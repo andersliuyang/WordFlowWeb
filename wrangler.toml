@@ -1,0 +1,14 @@
+name = "wordflow"
+main = "src/worker.js"
+compatibility_date = "2026-09-14"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+
+# 复用 HellBall 的 KV 命名空间，键带 wordflow: 前缀，互不冲突
+[[kv_namespaces]]
+binding = "LEADERBOARD"
+id = "c26facb8344e4d1a966f6791b9b9b46a"
+preview_id = "c26facb8344e4d1a966f6791b9b9b46a"
