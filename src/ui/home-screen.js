@@ -12,7 +12,6 @@ export function mountHomeScreen(root) {
             <span class="brand__en">WordFlow</span>
             <span class="brand__zh">字 · 谜</span>
           </div>
-          <p class="home__tagline">3D 消除填字 · 零资源 · 纯前端</p>
         </header>
         <main class="home__actions">
           <button class="btn btn--primary" id="btn-start" type="button">开始游戏</button>
