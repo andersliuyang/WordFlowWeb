@@ -4,26 +4,6 @@ import { createTextTexture } from '../render/text-texture.js'
 
 const GLYPHS = ['字', '谜', 'W', 'O', '词', 'R', 'D', '风']
 
-// 莫兰迪 / 马卡龙 低多边形配色
-const SHAPE_COLORS = [
-  0xd7b8b2, // 莫兰迪 玫瑰
-  0xb9c7b3, // 莫兰迪 鼠尾草绿
-  0xaec1d4, // 莫兰迪 雾霾蓝
-  0xc9b6d4, // 莫兰迪 薰衣草
-  0xe0ccac, // 莫兰迪 沙
-  0xd0a48f, // 莫兰迪 陶土
-  0xe6c9c0, // 马卡龙 粉
-  0xc3d6cd, // 马卡龙 薄荷
-]
-
-const SHAPES = [
-  () => new THREE.IcosahedronGeometry(1.1, 0),
-  () => new THREE.DodecahedronGeometry(1.05, 0),
-  () => new THREE.OctahedronGeometry(1.15, 0),
-  () => new THREE.TetrahedronGeometry(1.25, 0),
-  () => new THREE.IcosahedronGeometry(0.95, 1),
-]
-
 function mulberry32(seed) {
   let a = seed
   return function random() {
@@ -46,8 +26,8 @@ function makeFloater(mesh, random) {
 }
 
 /**
- * 首页 3D 背景：低多边形几何体 + 字符方块 + 柔和粒子 + 指针视差。
- * 低多边形莫兰迪 / 马卡龙风格，全部由代码生成，不加载任何外部资源。
+ * 首页 3D 背景：圆角字符骰子 + 柔和粒子 + 指针视差。
+ * 莫兰迪 / 马卡龙风格，全部由代码生成，不加载任何外部资源。
  */
 export function createHomeScene(canvas) {
   const scene = new THREE.Scene()
@@ -77,38 +57,11 @@ export function createHomeScene(canvas) {
   const floaters = []
   const disposables = []
 
-  const shapeCount = 14
-  for (let i = 0; i < shapeCount; i += 1) {
-    const geometry = SHAPES[i % SHAPES.length]()
-    const color = SHAPE_COLORS[Math.floor(random() * SHAPE_COLORS.length)]
-    const material = new THREE.MeshStandardMaterial({
-      color,
-      flatShading: true,
-      roughness: 0.85,
-      metalness: 0,
-    })
-    const mesh = new THREE.Mesh(geometry, material)
-
-    const angle = (i / shapeCount) * Math.PI * 2 + random() * 0.6
-    const radius = 9 * (0.5 + random() * 0.55)
-    mesh.position.set(
-      Math.cos(angle) * radius,
-      (random() - 0.5) * 10,
-      -2 - random() * 9,
-    )
-    mesh.rotation.set(random() * Math.PI, random() * Math.PI, random() * Math.PI)
-    makeFloater(mesh, random)
-
-    group.add(mesh)
-    floaters.push(mesh)
-    disposables.push(geometry, material)
-  }
-
   const cubeGeometry = new RoundedBoxGeometry(1.6, 1.6, 1.6, 4, 0.26)
   disposables.push(cubeGeometry)
-  const cubeCount = 6
+  const cubeCount = 12
   for (let i = 0; i < cubeCount; i += 1) {
-    const glyph = GLYPHS[i]
+    const glyph = GLYPHS[i % GLYPHS.length]
     const material = new THREE.MeshStandardMaterial({
       map: createTextTexture(glyph),
       roughness: 0.72,
@@ -116,14 +69,14 @@ export function createHomeScene(canvas) {
     })
     const mesh = new THREE.Mesh(cubeGeometry, material)
 
-    const angle = (i / cubeCount) * Math.PI * 2 + 0.35 + random() * 0.4
-    const radius = 8.5 * (0.55 + random() * 0.4)
+    const angle = (i / cubeCount) * Math.PI * 2 + random() * 0.5
+    const radius = 9 * (0.45 + random() * 0.55)
     mesh.position.set(
       Math.cos(angle) * radius,
-      (random() - 0.5) * 8,
-      -1 - random() * 6,
+      (random() - 0.5) * 9,
+      -1 - random() * 8,
     )
-    mesh.rotation.set((random() - 0.5) * 0.5, random() * Math.PI, (random() - 0.5) * 0.3)
+    mesh.rotation.set((random() - 0.5) * 0.6, random() * Math.PI, (random() - 0.5) * 0.4)
     makeFloater(mesh, random)
 
     group.add(mesh)
