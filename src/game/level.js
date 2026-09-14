@@ -4,6 +4,7 @@ import {
   crackIce,
   clearPath,
   unlockLocks,
+  breakStones,
   tickBombs,
   findCascadeWord,
 } from './rules.js'
@@ -28,6 +29,7 @@ export function compileLevel(def) {
           tile.locked = true
         }
         if (obs.type === 'bomb') tile.countdown = obs.countdown ?? 5
+        if (obs.type === 'stone') tile.locked = true
       }
       tiles.push(tile)
     }
@@ -115,6 +117,7 @@ export function solveBoard(cols, rows, tiles, wordList, options = {}) {
       const clearedCells = path.map(([x, y]) => [x, y])
       clearPath(next, path)
       unlockLocks(next, id, clearedCells)
+      breakStones(next, clearedCells)
       let moves = next.applyGravity()
 
       const cascades = []

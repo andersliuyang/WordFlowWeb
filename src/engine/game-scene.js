@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { createGlyphTexture } from '../render/tile-texture.js'
-import { playClear, playSelect, playSlide, playImpact, playShatter, playIceBreak, playUnlock, playTick, playExplosion, playDefuse } from '../audio/sfx.js'
+import { playClear, playSelect, playSlide, playImpact, playShatter, playIceBreak, playUnlock, playTick, playExplosion, playDefuse, playRockBreak } from '../audio/sfx.js'
 
 const TILE_SIZE = 1
 const SPACING = 1.16
@@ -10,12 +10,13 @@ const DECAL_GEO = new THREE.PlaneGeometry(0.66, 0.66)
 const SHARD_GEO = new THREE.BoxGeometry(0.17, 0.17, 0.17)
 
 function decalKey(tile) {
-  return [tile.char, tile.type, tile.hp ?? '', tile.countdown ?? 0, tile.locked ? 1 : 0].join('|')
+  return [tile.char, tile.type, tile.hp ?? '', tile.countdown ?? 0, tile.locked ? 1 : 0, tile.broken ? 1 : 0].join('|')
 }
 
 function tileColor(tile) {
   if (tile.type === 'ice') return (tile.hp || 1) > 1 ? 0xbfe0ec : 0xf0e4d6
   if (tile.type === 'lock') return tile.locked ? 0xc6ccd6 : 0xf0e4d6
+  if (tile.type === 'stone') return tile.broken ? 0xf0e4d6 : 0xb9b2a6
   if (tile.type === 'bomb') return 0xf0d7d0
   return 0xf0e4d6
 }
@@ -171,6 +172,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
       let view = views.get(id)
       if (!view) view = buildView(tile)
       view.tile = tile
+      view.mesh.userData.tile = tile
       view.manual = false
       view.targetPos = worldPos(tile.x, tile.y)
       view.removing = false
@@ -640,6 +642,27 @@ export function createGameScene(canvas, level, callbacks = {}) {
         })
         playUnlock()
         flashViews(vs, 0.32, nextStep)
+      } else if (ev.kind === 'break') {
+        const vs = tileViewsAt(ev.tiles)
+        vs.forEach((v) => {
+          updateTileVisual(v)
+          burstAtWorld(v.mesh.position, {
+            color: 0xb7afa2,
+            count: 26,
+            size: 0.24,
+            ttl: 0.7,
+            speedMin: 0.08,
+            speedMax: 0.18,
+            up: 0.15,
+            gravity: 0.9,
+          })
+          spawnShards(0x9d968a, v.mesh.position, 12)
+          shockwave(v.mesh.position, 0xc7c0b4)
+        })
+        shake = Math.max(shake, 0.24)
+        vibrate(28)
+        playRockBreak()
+        flashViews(vs, 0.3, nextStep)
       } else if (ev.kind === 'bombTick') {
         const vs = tileViewsAt(ev.tiles)
         vs.forEach((v) => {

@@ -17,8 +17,8 @@ function roundRect(ctx, x, y, w, h, r) {
  * 仅用于骰子顶面，其它面保持纯色，不含任何文字。
  */
 export function createGlyphTexture(char, options = {}) {
-  const { type = 'normal', countdown = 0, locked = false, hp = 2, size = 256 } = options
-  const key = [char, type, countdown, locked, hp, size].join('|')
+  const { type = 'normal', countdown = 0, locked = false, hp = 2, broken = false, size = 256 } = options
+  const key = [char, type, countdown, locked, hp, broken, size].join('|')
   if (glyphCache.has(key)) return glyphCache.get(key)
 
   const canvas = document.createElement('canvas')
@@ -45,6 +45,41 @@ export function createGlyphTexture(char, options = {}) {
 
   // 锁定时用一个大挂锁盖住字符
   let skipChar = false
+  if (type === 'stone' && !broken) {
+    // 石头盖住字符
+    skipChar = true
+    const s = size
+    ctx.fillStyle = '#9d968a'
+    ctx.beginPath()
+    ctx.moveTo(s * 0.2, s * 0.66)
+    ctx.lineTo(s * 0.3, s * 0.34)
+    ctx.lineTo(s * 0.52, s * 0.24)
+    ctx.lineTo(s * 0.74, s * 0.36)
+    ctx.lineTo(s * 0.82, s * 0.62)
+    ctx.lineTo(s * 0.62, s * 0.78)
+    ctx.lineTo(s * 0.34, s * 0.76)
+    ctx.closePath()
+    ctx.fill()
+
+    ctx.fillStyle = '#b7afa2'
+    ctx.beginPath()
+    ctx.moveTo(s * 0.52, s * 0.26)
+    ctx.lineTo(s * 0.73, s * 0.37)
+    ctx.lineTo(s * 0.6, s * 0.56)
+    ctx.lineTo(s * 0.4, s * 0.5)
+    ctx.closePath()
+    ctx.fill()
+
+    ctx.strokeStyle = '#6f6a60'
+    ctx.lineWidth = s * 0.018
+    ctx.lineCap = 'round'
+    ctx.beginPath()
+    ctx.moveTo(s * 0.34, s * 0.4)
+    ctx.lineTo(s * 0.46, s * 0.5)
+    ctx.lineTo(s * 0.36, s * 0.6)
+    ctx.stroke()
+  }
+
   if (type === 'lock' && locked) {
     skipChar = true
     const cx = size / 2

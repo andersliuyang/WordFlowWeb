@@ -47,6 +47,21 @@ export function unlockLocks(board, wordId, clearedCells) {
   return unlocked
 }
 
+/** 石头：相邻有方块被消除时碎裂，恢复为普通方块。 */
+export function breakStones(board, clearedCells) {
+  const broken = []
+  for (const tile of board.tiles()) {
+    if (tile.type !== 'stone' || !tile.locked) continue
+    const adjacent = clearedCells.some(([x, y]) => Math.abs(x - tile.x) <= 1 && Math.abs(y - tile.y) <= 1)
+    if (adjacent) {
+      tile.locked = false
+      tile.broken = true
+      broken.push(tile)
+    }
+  }
+  return broken
+}
+
 export function tickBombs(board) {
   const exploded = []
   for (const tile of board.tiles()) {

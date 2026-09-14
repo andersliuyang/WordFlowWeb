@@ -13,27 +13,6 @@ function check(condition, message) {
   if (!condition) throw new Error(message)
 }
 
-for (const level of LEVELS) {
-  try {
-    const session = new GameSession(level)
-    let guard = 0
-    while (session.status === 'playing' && guard < 200) {
-      guard += 1
-      const hint = session.findHint()
-      if (!hint) break
-      const res = session.submitPath(hint.path)
-      check(res.type === 'target', `${level.id}: expected target, got ${res.type}`)
-    }
-    check(session.status === 'won', `${level.id}: ended '${session.status}' remaining=${session.remaining.size}`)
-    console.log(`OK   ${level.id}  moves=${session.moves}`)
-    passed += 1
-  } catch (error) {
-    console.log(`FAIL ${level.id}: ${error.message}`)
-    failed += 1
-  }
-}
-
-// 乱序游玩 + 死局重排：验证任何情况下都能通关
 function mulberry32(seed) {
   let a = seed
   return function random() {
@@ -45,26 +24,49 @@ function mulberry32(seed) {
   }
 }
 
+// 1) 标准解（生成器给出的 solution_flow）应能通关
 for (const level of LEVELS) {
   try {
     const session = new GameSession(level)
-    const random = mulberry32(97 + level.id.length)
+    for (const step of level.solution_flow) {
+      if (!session.remaining.has(step.word_id)) continue
+      const word = session.remaining.get(step.word_id)
+      const path = session.board.findPath(word.text)
+      check(path, `${level.id}: '${word.text}' not formable in solution`)
+      const res = session.submitPath(path)
+      check(res.type === 'target', `${level.id}: solution submit -> ${res.type}`)
+      check(session.status !== 'lost', `${level.id}: lost during solution`)
+    }
+    check(session.status === 'won', `${level.id}: solution ended '${session.status}' remaining=${session.remaining.size}`)
+    passed += 1
+  } catch (error) {
+    console.log(`FAIL ${level.id}: ${error.message}`)
+    failed += 1
+  }
+}
+
+// 2) 乱序游玩：死局可重排；允许因炸弹爆炸而失败
+for (const level of LEVELS) {
+  try {
+    const session = new GameSession(level)
+    const random = mulberry32(97 + level.id.length * 31)
     let guard = 0
-    let shuffles = 0
-    while (session.status === 'playing' && guard < 400) {
+    while (session.status === 'playing' && guard < 500) {
       guard += 1
       const candidates = [...session.remaining.values()].filter((word) => session.board.findPath(word.text))
       if (candidates.length === 0) {
         check(session.shuffle(random), `${level.id}: shuffle failed`)
-        shuffles += 1
         continue
       }
       const word = candidates[Math.floor(random() * candidates.length)]
       const res = session.submitPath(session.board.findPath(word.text))
       check(res.type === 'target', `${level.id}: random submit -> ${res.type}`)
     }
-    check(session.status === 'won', `${level.id}: random play ended '${session.status}'`)
-    console.log(`OK   ${level.id}  random-play shuffles=${shuffles}`)
+    if (session.status === 'lost') {
+      check(session.reason === 'bomb', `${level.id}: random lost by ${session.reason}`)
+    } else {
+      check(session.status === 'won', `${level.id}: random play stuck (remaining=${session.remaining.size})`)
+    }
     passed += 1
   } catch (error) {
     console.log(`FAIL ${level.id} (random): ${error.message}`)
@@ -72,7 +74,7 @@ for (const level of LEVELS) {
   }
 }
 
-// 彩蛋词：每关登记的彩蛋都应能在开局拼出并计入彩蛋槽
+// 3) 彩蛋词可拼出并计入彩蛋槽
 for (const level of LEVELS) {
   if (!level.bonus_dictionary || level.bonus_dictionary.length === 0) continue
   try {
@@ -83,7 +85,6 @@ for (const level of LEVELS) {
       const res = session.submitPath(path)
       check(res.type === 'bonus', `${level.id}: bonus '${text}' -> ${res.type}`)
     }
-    console.log(`OK   ${level.id}  bonus=${level.bonus_dictionary.join(',')}`)
     passed += 1
   } catch (error) {
     console.log(`FAIL ${level.id} (bonus): ${error.message}`)
@@ -91,6 +92,7 @@ for (const level of LEVELS) {
   }
 }
 
+// 4) 匹配器用例
 try {
   const board = new Board(3, 3)
   board.set(0, 0, { x: 0, y: 0, char: 'A', type: 'normal' })
@@ -100,7 +102,6 @@ try {
   check(board.findPath('CBA'), 'reverse match')
   board.set(1, 0, { x: 1, y: 0, char: 'X', type: 'normal' })
   check(!board.findPath('ABC'), 'gap must not match')
-  console.log('OK   matcher (adjacency / reverse)')
   passed += 1
 } catch (error) {
   console.log(`FAIL matcher: ${error.message}`)

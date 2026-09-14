@@ -67,14 +67,21 @@ function bombTile(x, y) {
     <circle cx="${x + 28}" cy="${y + 4.5}" r="2.6" fill="#f6b23e"/>`
 }
 
+function stoneTile(x, y) {
+  return `<rect x="${x}" y="${y}" width="44" height="44" rx="12" fill="#d9d3c8" stroke="#b3aa9b" stroke-width="2"/>
+    <path d="M${x + 9} ${y + 32} L${x + 13} ${y + 15} L${x + 23} ${y + 9} L${x + 33} ${y + 15} L${x + 36} ${y + 31} L${x + 27} ${y + 37} L${x + 15} ${y + 36} Z" fill="#9d968a"/>
+    <path d="M${x + 23} ${y + 10} L${x + 32} ${y + 16} L${x + 26} ${y + 26} L${x + 16} ${y + 22} Z" fill="#b7afa2"/>`
+}
+
 function obstaclesVisual(label, font) {
   return `<svg viewBox="0 0 260 120" role="img" aria-hidden="true">
-    ${iceTile(24, 32)}
-    ${lockTile(108, 32)}
-    ${bombTile(192, 32)}
-    <circle cx="${192 + 38}" cy="${32 + 8}" r="9" fill="#d97b6c"/>
-    <text x="${192 + 38}" y="${32 + 12}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff6ee" font-family="${font}">3</text>
-    <text x="130" y="104" text-anchor="middle" font-size="13" fill="#8f887c" font-family="${font}">${label}</text>
+    ${iceTile(20, 32)}
+    ${lockTile(80, 32)}
+    ${bombTile(140, 32)}
+    ${stoneTile(200, 32)}
+    <circle cx="${140 + 38}" cy="${32 + 8}" r="9" fill="#d97b6c"/>
+    <text x="${140 + 38}" y="${32 + 12}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff6ee" font-family="${font}">3</text>
+    <text x="130" y="108" text-anchor="middle" font-size="12" fill="#8f887c" font-family="${font}">${label}</text>
   </svg>`
 }
 
@@ -102,7 +109,7 @@ const VISUALS = {
       <rect x="162" y="34" width="44" height="44" rx="12" fill="none" stroke="#cbb6a8" stroke-width="2" stroke-dasharray="6 5"/>
       <text x="130" y="106" text-anchor="middle" font-size="15" font-weight="700" fill="#d0a48f" font-family="PingFang SC,sans-serif">+ 金币 / 道具</text>
     </svg>`,
-    obstacles: obstaclesVisual('两次 · 解锁 · 倒计时', 'PingFang SC,sans-serif'),
+    obstacles: obstaclesVisual('冰 · 锁 · 炸 · 石', 'PingFang SC,sans-serif'),
     hint: hintVisual('20 · 40 · 80 · 30 金币', 'PingFang SC,sans-serif'),
     goal: `<svg viewBox="0 0 260 120" role="img" aria-hidden="true">
       <text x="130" y="66" text-anchor="middle" font-size="46" fill="#e2b25e" font-family="PingFang SC,sans-serif">★ ★ ★</text>
@@ -133,7 +140,7 @@ const VISUALS = {
       <rect x="162" y="34" width="44" height="44" rx="12" fill="none" stroke="#cbb6a8" stroke-width="2" stroke-dasharray="6 5"/>
       <text x="130" y="106" text-anchor="middle" font-size="14" font-weight="700" fill="#d0a48f" font-family="Arial,sans-serif">+ coins / items</text>
     </svg>`,
-    obstacles: obstaclesVisual('2x · Unlock · Timer', 'Arial,sans-serif'),
+    obstacles: obstaclesVisual('Ice · Lock · Bomb · Stone', 'Arial,sans-serif'),
     hint: hintVisual('20 · 40 · 80 · 30 coins', 'Arial,sans-serif'),
     goal: `<svg viewBox="0 0 260 120" role="img" aria-hidden="true">
       <text x="130" y="66" text-anchor="middle" font-size="46" fill="#e2b25e" font-family="Arial,sans-serif">★ ★ ★</text>

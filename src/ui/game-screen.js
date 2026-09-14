@@ -5,6 +5,7 @@ import { t, getTip } from '../i18n/index.js'
 import { playBonus, playFail, playWin, playLose } from '../audio/sfx.js'
 import { showToast } from './toast.js'
 import { mountCoach } from './coach.js'
+import { levelMotif } from './level-motif.js'
 
 function starsFor(moves, wordCount) {
   if (moves <= wordCount) return 3
@@ -29,6 +30,7 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
   const el = document.createElement('div')
   el.className = 'screen game-screen'
   el.innerHTML = `
+    <div class="game__motif" aria-hidden="true">${levelMotif(level)}</div>
     <canvas class="game__canvas"></canvas>
     <div class="hud">
       <header class="hud__top">
@@ -118,7 +120,7 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
   function scheduleInitialTips() {
     const types = new Set(level.initial_board.map((tile) => tile.type))
     const initial = ['connect']
-    for (const type of ['ice', 'lock', 'bomb']) if (types.has(type)) initial.push(type)
+    for (const type of ['ice', 'lock', 'bomb', 'stone']) if (types.has(type)) initial.push(type)
     if ((level.bonus_dictionary || []).length) initial.push('bonus')
     initial.push('hint')
     for (const id of initial) if (!saveStore.hasTip(id)) tipQueue.push(id)

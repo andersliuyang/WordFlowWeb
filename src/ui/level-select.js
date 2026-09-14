@@ -1,4 +1,5 @@
 import { t, getLanguage } from '../i18n/index.js'
+import { levelMotif } from './level-motif.js'
 
 function starsMarkup(stars) {
   let out = ''
@@ -34,6 +35,7 @@ export function mountLevelSelect({ levels, save, onPlay, onBack, onSettings, onG
           const disabled = unlocked ? '' : 'disabled'
           return `
             <button class="level-card ${state}" data-id="${level.id}" type="button" ${disabled}>
+              <span class="level-card__motif" aria-hidden="true">${levelMotif(level)}</span>
               <span class="level-card__no">${String(index + 1).padStart(2, '0')}</span>
               <span class="level-card__theme">${level.theme}</span>
               <span class="level-card__stars">${unlocked ? starsMarkup(stars) : '<span class="lock">🔒</span>'}</span>

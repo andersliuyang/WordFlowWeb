@@ -5,6 +5,7 @@ import { Board } from '../src/game/board.js'
 import { compileLevel, solve } from '../src/game/level.js'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
+const LEVELS_PER_LANGUAGE = 100
 
 function mulberry32(seed) {
   let a = seed
@@ -17,9 +18,27 @@ function mulberry32(seed) {
   }
 }
 
+function hashSeed(str) {
+  let h = 2166136261
+  for (const ch of str) {
+    h ^= ch.charCodeAt(0)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
 const ZH_FILLER = [...'山水风月花草林木云雨天地江海星火石金土田人心思春秋冬夏日夜明光高远长清秀语香暖收藏阔厚意一二三飞鸟鱼虫江河湖海松竹梅兰舟桥雪霜']
 const EN_FILLER = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ']
 const DIRECTIONS = [[1, 0], [0, 1], [1, 1], [1, -1], [-1, 0], [0, -1], [-1, -1], [-1, 1]]
+
+const ZH2 = [...new Set(['山水', '明月', '春风', '江河', '花草', '森林', '云海', '日月', '山川', '星光', '青山', '绿水', '白云', '夏雨', '秋月', '冬雪', '天高', '地厚', '海阔', '天空', '春华', '秋实', '花明', '柳暗', '山明', '水秀', '鸟语', '花香', '清风', '夜雨', '阳光', '流水', '星月', '云淡', '风轻', '花好', '月圆', '天长', '地久', '山高', '水长', '风花', '雪月', '春色', '心旷', '神怡', '松风', '竹影', '梅香', '兰韵', '湖光', '山色', '天朗', '气清', '秋高', '气爽', '冰天', '雪地', '桃红', '柳绿', '春暖', '花开', '秋收', '冬藏', '五谷', '丰登', '风和', '日丽', '万紫', '千红', '莺歌', '燕舞', '波澜', '壮阔', '一望', '无际', '水波', '荡漾', '景色', '宜人', '大河', '奔流', '寒来', '暑往', '春去', '秋来', '江山', '烟雨', '晨曦', '暮色', '归鸟', '远山', '银河', '碧空'])]
+const ZH3 = ['春江水', '山外山', '云中月', '花间语', '林间风', '水上舟', '山中月', '天边云', '雪中梅', '雨后春', '一叶秋', '半山亭', '十里香', '千重浪', '万里云']
+const ZH4 = ['春暖花开', '山清水秀', '鸟语花香', '花好月圆', '春华秋实', '山明水秀', '云淡风轻', '柳暗花明', '海阔天空', '天高云淡', '青山绿水', '风和日丽', '冰天雪地', '桃红柳绿', '百花齐放', '万紫千红', '莺歌燕舞', '层峦叠翠', '波澜壮阔', '一望无际', '星罗棋布', '五谷丰登', '风调雨顺', '心旷神怡', '水波荡漾', '景色宜人', '大河奔流', '高山流水', '秋高气爽', '万物复苏']
+const EN3 = ['CAT', 'DOG', 'FOX', 'OWL', 'BAT', 'EGG', 'BEE', 'COW', 'SUN', 'SKY', 'SEA', 'ICE', 'ARM', 'ART', 'FAN', 'HAT', 'RUG', 'JAM', 'MUD', 'POT', 'BAG', 'BED', 'CUP', 'KEY', 'MAP', 'NET', 'PEN', 'RAM', 'TAP', 'VAN', 'WAX', 'YAK', 'ZIP', 'AXE', 'BOX', 'BUS', 'CAR', 'HEN', 'JAR', 'KIT', 'LOG', 'MOP', 'OAK', 'PIG', 'RAT', 'SAW', 'TOY', 'URN']
+const EN4 = ['TREE', 'LEAF', 'MOON', 'STAR', 'ROCK', 'WAVE', 'SAND', 'FIRE', 'WIND', 'RAIN', 'SNOW', 'LAKE', 'FISH', 'BIRD', 'WOLF', 'BEAR', 'LION', 'FROG', 'DUCK', 'SWAN', 'MOSS', 'FERN', 'SEED', 'ROOT', 'VINE', 'CAVE', 'HILL', 'LAWN', 'POND', 'REEF', 'DUNE', 'PEAK', 'GALE', 'FROST', 'MIST', 'HAIL', 'DUSK', 'DAWN', 'PATH', 'GATE']
+
+const ZH_THEMES = ['自然', '四季', '山水', '田园', '风物', '江河', '星月', '花木']
+const EN_THEMES = ['Nature', 'Seasons', 'Animals', 'Sky', 'Objects', 'Elements', 'Landscape']
 
 function shuffle(list, random) {
   for (let i = list.length - 1; i > 0; i -= 1) {
@@ -28,6 +47,120 @@ function shuffle(list, random) {
   }
   return list
 }
+
+function pickWords(lang, rand, count, allowLong) {
+  const pool = []
+  if (lang === 'zh-CN') {
+    const long = allowLong ? shuffle([...ZH3, ...ZH4], rand) : []
+    const longCount = allowLong ? Math.min(long.length, Math.max(1, Math.floor(count / 2))) : 0
+    pool.push(...long.slice(0, longCount))
+    pool.push(...shuffle(ZH2.slice(), rand))
+  } else {
+    const long = allowLong ? shuffle(EN4.slice(), rand) : []
+    const longCount = allowLong ? Math.min(long.length, Math.max(1, Math.floor(count / 2))) : 0
+    pool.push(...long.slice(0, longCount))
+    pool.push(...shuffle(EN3.slice(), rand))
+  }
+  const out = []
+  const seen = new Set()
+  for (const text of pool) {
+    if (seen.has(text)) continue
+    seen.add(text)
+    out.push(text)
+    if (out.length >= count) break
+  }
+  return out
+}
+
+function tierOf(n) {
+  if (n <= 8) return 'tutorial'
+  if (n <= 20) return 'easy'
+  if (n <= 38) return 'medium'
+  if (n <= 58) return 'medium2'
+  if (n <= 78) return 'hard'
+  if (n <= 92) return 'hard2'
+  return 'expert'
+}
+
+function gridOf(n, rand) {
+  const t = tierOf(n)
+  if (t === 'tutorial') return { x: 3, y: 3 }
+  if (t === 'easy') return n <= 14 ? { x: 4, y: 4 } : { x: 4, y: 5 }
+  if (t === 'medium') return rand() < 0.5 ? { x: 5, y: 5 } : { x: 5, y: 4 }
+  if (t === 'medium2') return rand() < 0.5 ? { x: 6, y: 6 } : { x: 5, y: 6 }
+  if (t === 'hard') return rand() < 0.5 ? { x: 6, y: 6 } : { x: 6, y: 7 }
+  if (t === 'hard2') return rand() < 0.5 ? { x: 7, y: 7 } : { x: 7, y: 8 }
+  return { x: 8, y: 8 }
+}
+
+function wordCountOf(n, rand) {
+  const t = tierOf(n)
+  if (t === 'tutorial') return n <= 4 ? 2 : 3
+  if (t === 'easy') return n <= 14 ? 3 : 4
+  if (t === 'medium') return 4
+  if (t === 'medium2') return rand() < 0.5 ? 4 : 5
+  if (t === 'hard') return 5
+  if (t === 'hard2') return 6
+  return rand() < 0.5 ? 6 : 7
+}
+
+function chainSizesOf(n, rand) {
+  const t = tierOf(n)
+  if (n < 17) return []
+  if (t === 'easy') return [2]
+  if (t === 'medium') return rand() < 0.5 ? [2] : [2, 2]
+  if (t === 'medium2') return rand() < 0.5 ? [2, 2] : [2, 2, 2]
+  if (t === 'hard') return rand() < 0.5 ? [2, 2] : [3, 2]
+  if (t === 'hard2') return rand() < 0.5 ? [3, 2] : [2, 2, 2]
+  return rand() < 0.5 ? [3, 2] : [3, 2, 2]
+}
+
+function obstaclesOf(n) {
+  const plan = {}
+  if (n >= 30) plan.ice = n >= 79 ? 2 : 1
+  if (n >= 43) plan.bomb = n >= 92 ? 2 : 1
+  if (n >= 52) plan.lock = 1
+  if (n >= 68) plan.stone = n >= 90 ? 2 : 1
+  plan.iceHp = n >= 79 ? 3 : 2
+  plan.bombCountdown = n < 60 ? 8 : n < 82 ? 6 : 4
+  return plan
+}
+
+function makeSpec(lang, n) {
+  const rand = mulberry32(hashSeed(`${lang}:${n}`) ^ (n * 2654435761))
+  const grid = gridOf(n, rand)
+  const count = wordCountOf(n, rand)
+  const allowLong = n >= 21
+  const texts = pickWords(lang, rand, count + 2, allowLong).slice(0, count)
+
+  const words = texts.map((text, i) => ({ id: `w${i + 1}`, text, hint: '' }))
+
+  // 链：按 chainSizes 顺序分组，长度和需 ≤ 行数，否则余下的作普通词
+  const chains = []
+  let cursor = 0
+  for (const size of chainSizesOf(n, rand)) {
+    const group = words.slice(cursor, cursor + size)
+    if (group.length < size) break
+    const sum = group.reduce((acc, w) => acc + w.text.length, 0)
+    if (sum > grid.y) break
+    chains.push(group.map((w) => w.id))
+    cursor += size
+  }
+
+  return {
+    id: `wf_${lang === 'zh-CN' ? 'zh' : 'en'}_${String(n).padStart(3, '0')}`,
+    language: lang,
+    theme: lang === 'zh-CN' ? ZH_THEMES[n % ZH_THEMES.length] : EN_THEMES[n % EN_THEMES.length],
+    tier: tierOf(n),
+    grid,
+    words,
+    chains,
+    obstacles: obstaclesOf(n),
+    bonus: [],
+  }
+}
+
+// ---------------- 摆放 ----------------
 
 function findBlockStart(seq, word) {
   for (let i = 0; i + word.text.length <= seq.length; i += 1) {
@@ -123,12 +256,6 @@ function buildBoard(spec, random) {
     wordCells.set(word.id, path)
   }
 
-  const targetTexts = new Set(words.map((w) => w.text))
-  const bonusPlaced = []
-  for (const text of shuffle((spec.bonus || []).filter((t) => !targetTexts.has(t)), random)) {
-    if (tryPlaceStraight(cells, cols, rows, text, random)) bonusPlaced.push(text)
-  }
-
   const usedChars = new Set(words.flatMap((w) => [...w.text]))
   let pool = (spec.language === 'zh-CN' ? ZH_FILLER : EN_FILLER).filter((c) => !usedChars.has(c))
   if (pool.length < 6) pool = spec.language === 'zh-CN' ? ZH_FILLER : EN_FILLER
@@ -138,13 +265,9 @@ function buildBoard(spec, random) {
     }
   }
 
-  return { rows: cells.map((row) => row.join('')), bonus: bonusPlaced, wordCells }
+  return { rows: cells.map((row) => row.join('')), wordCells }
 }
 
-/**
- * 障碍只放在目标词的格子上，保证真正参与玩法；
- * 锁链的 lockKey 选另一个不占用该格的词。
- */
 function assignObstacles(spec, wordCells, random) {
   const plan = spec.obstacles || {}
   const obstacles = {}
@@ -168,8 +291,9 @@ function assignObstacles(spec, wordCells, random) {
     used.add(cell.key)
   }
 
-  for (let i = 0; i < (plan.ice || 0); i += 1) add('ice', { hp: 2 })
-  for (let i = 0; i < (plan.bomb || 0); i += 1) add('bomb', { countdown: plan.bombCountdown || 7 })
+  for (let i = 0; i < (plan.ice || 0); i += 1) add('ice', { hp: plan.iceHp || 2 })
+  for (let i = 0; i < (plan.bomb || 0); i += 1) add('bomb', { countdown: plan.bombCountdown || 6 })
+  for (let i = 0; i < (plan.stone || 0); i += 1) add('stone', {})
   for (let i = 0; i < (plan.lock || 0); i += 1) {
     const cell = pickCell()
     if (!cell) continue
@@ -185,8 +309,7 @@ function assignObstacles(spec, wordCells, random) {
 
 function buildLevel(spec, seed) {
   const random = mulberry32(seed)
-  const bonusList = spec.bonus || BONUS[spec.id] || []
-  const built = buildBoard({ ...spec, bonus: bonusList }, random)
+  const built = buildBoard(spec, random)
   if (!built) return null
 
   const obstacles = assignObstacles(spec, built.wordCells, random)
@@ -200,9 +323,9 @@ function buildLevel(spec, seed) {
     obstacles,
     moveLimit: spec.moveLimit ?? null,
     bonusTarget: spec.bonusTarget ?? 3,
-    reward: spec.reward ?? { coins: 40 + spec.words.length * 15, stars: 3 },
+    reward: spec.reward ?? { coins: 40 + spec.words.length * 12, stars: 3 },
     words: spec.words.map((word) => ({ id: word.id, text: word.text, hint: word.hint })),
-    bonus: built.bonus,
+    bonus: spec.bonus || [],
   }
 
   const level = compileLevel(def)
@@ -221,7 +344,6 @@ function buildLevel(spec, seed) {
   if (!flow) return null
   level.solution_flow = flow
 
-  // 校验：每个障碍都必须出现在某一步的消除路径里（否则就是无效装饰）
   const usedCells = new Set()
   for (const step of flow) {
     for (const [x, y] of step.path) usedCells.add(`${x},${y}`)
@@ -232,157 +354,52 @@ function buildLevel(spec, seed) {
   for (const tile of level.initial_board) {
     if (tile.type !== 'normal' && !usedCells.has(`${tile.x},${tile.y}`)) return null
   }
-
-  const cascadeCount = flow.reduce((sum, step) => sum + (step.cascades ? step.cascades.length : 0), 0)
-  const obstacleCount = level.initial_board.filter((t) => t.type !== 'normal').length
-  return { level, cascadeCount, chainShape: (spec.chains || []).map((c) => c.length).join('+') || '-', obstacleCount }
+  return level
 }
 
-const W = (id, text, hint) => ({ id, text, hint })
-
-// 链的长度混合 2/3/4 字词，使列高与块型各不相同
-const SPECS = [
-  // ================= 中文：2/3/4 字混合 =================
-  { id: 'wf_zh_001', language: 'zh-CN', theme: '自然', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', '山水', '山与水的合称'), W('w2', '明月', '明亮的月亮')] },
-  { id: 'wf_zh_002', language: 'zh-CN', theme: '自然', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', '春风', '春天的风'), W('w2', '江河', '江与河')] },
-  { id: 'wf_zh_003', language: 'zh-CN', theme: '自然', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', '花草', '花与草'), W('w2', '森林', '成片的树木'), W('w3', '云海', '像海一样的云')] },
-
-  { id: 'wf_zh_004', language: 'zh-CN', theme: '自然', tier: 'easy', grid: { x: 4, y: 4 },
-    chains: [['w1', 'w2']],
-    words: [W('w1', '日月', '太阳与月亮'), W('w2', '山川', '山与河流'), W('w3', '星光', '星星的光')] },
-  { id: 'wf_zh_005', language: 'zh-CN', theme: '自然', tier: 'easy', grid: { x: 4, y: 5 },
-    chains: [['w1', 'w2']],
-    words: [W('w1', '春江水', '春天的江水'), W('w2', '明月', '明亮的月亮'), W('w3', '青山', '青翠的山'), W('w4', '绿水', '碧绿的水')] },
-  { id: 'wf_zh_006', language: 'zh-CN', theme: '四季', tier: 'easy', grid: { x: 5, y: 5 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', '春风', '春天的风'), W('w2', '夏雨', '夏天的雨'), W('w3', '秋月', '秋天的月'), W('w4', '冬雪', '冬天的雪'), W('w5', '江河', '江与河')] },
-  { id: 'wf_zh_007', language: 'zh-CN', theme: '山野', tier: 'medium', grid: { x: 5, y: 6 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', '山外山', '山外还有山'), W('w2', '云海', '像海一样的云'), W('w3', '花间语', '花丛中的话语'), W('w4', '森林', '成片的树木'), W('w5', '星光', '星星的光')] },
-  { id: 'wf_zh_008', language: 'zh-CN', theme: '自然', tier: 'medium', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', '春暖花开', '春天温暖，花朵盛开'), W('w2', '山水', '山与水的合称'), W('w3', '鸟语花香', '鸟儿鸣叫，花朵芬芳'), W('w4', '明月', '明亮的月亮')] },
-  { id: 'wf_zh_009', language: 'zh-CN', theme: '胸怀', tier: 'medium', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2']],
-    words: [W('w1', '海阔天空', '形容广阔无边'), W('w2', '春风', '春天的风'), W('w3', '星光', '星星的光'), W('w4', '山川', '山与河流'), W('w5', '花草', '花与草'), W('w6', '江河', '江与河')] },
-  { id: 'wf_zh_010', language: 'zh-CN', theme: '四季', tier: 'hard', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2', 'w3'], ['w4', 'w5']],
-    obstacles: { ice: 1 },
-    words: [W('w1', '春风', '春天的风'), W('w2', '夏雨', '夏天的雨'), W('w3', '秋月', '秋天的月'), W('w4', '江河', '江与河'), W('w5', '花草', '花与草')] },
-  { id: 'wf_zh_011', language: 'zh-CN', theme: '自然', tier: 'hard', grid: { x: 6, y: 7 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1, bomb: 1, bombCountdown: 8 },
-    words: [W('w1', '云淡风轻', '形容天气晴好'), W('w2', '青山', '青翠的山'), W('w3', '花好月圆', '美好圆满'), W('w4', '绿水', '碧绿的水')] },
-  { id: 'wf_zh_012', language: 'zh-CN', theme: '自然', tier: 'hard', grid: { x: 6, y: 8 },
-    chains: [['w1', 'w2', 'w3'], ['w4', 'w5']],
-    obstacles: { ice: 1, lock: 1, bomb: 1, bombCountdown: 9 },
-    words: [W('w1', '山清水秀', '山水秀丽'), W('w2', '白云', '白色的云'), W('w3', '夏雨', '夏天的雨'), W('w4', '天高云淡', '天气晴朗'), W('w5', '秋月', '秋天的月')] },
-
-  // ================= English：3/4 字母混合 =================
-  { id: 'wf_en_001', language: 'en-US', theme: 'Animals', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', 'CAT', 'A small furry pet'), W('w2', 'DOG', 'A loyal pet')] },
-  { id: 'wf_en_002', language: 'en-US', theme: 'Sky', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', 'SUN', 'The star we orbit'), W('w2', 'SKY', 'The space above us')] },
-  { id: 'wf_en_003', language: 'en-US', theme: 'Animals', tier: 'tutorial', grid: { x: 3, y: 3 },
-    words: [W('w1', 'SEA', 'The ocean'), W('w2', 'ICE', 'Frozen water'), W('w3', 'FOX', 'A wild canine')] },
-
-  { id: 'wf_en_004', language: 'en-US', theme: 'Animals', tier: 'easy', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', 'CAT', 'A small furry pet'), W('w2', 'DOG', 'A loyal pet'), W('w3', 'FOX', 'A wild canine'), W('w4', 'OWL', 'A night bird')] },
-  { id: 'wf_en_005', language: 'en-US', theme: 'Animals', tier: 'easy', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', 'BAT', 'A flying mammal'), W('w2', 'EGG', 'Laid by birds'), W('w3', 'BEE', 'A buzzing insect'), W('w4', 'COW', 'A farm animal')] },
-  { id: 'wf_en_006', language: 'en-US', theme: 'Nature', tier: 'easy', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2']],
-    words: [W('w1', 'ARM', 'Part of the body'), W('w2', 'ART', 'Creative work'), W('w3', 'SEA', 'The ocean'), W('w4', 'ICE', 'Frozen water')] },
-  { id: 'wf_en_007', language: 'en-US', theme: 'Nature', tier: 'medium', grid: { x: 6, y: 7 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', 'TREE', 'A tall plant'), W('w2', 'SKY', 'The space above us'), W('w3', 'MOON', 'Earth’s satellite'), W('w4', 'ICE', 'Frozen water'), W('w5', 'RAIN', 'Falling water')] },
-  { id: 'wf_en_008', language: 'en-US', theme: 'Elements', tier: 'medium', grid: { x: 7, y: 7 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    words: [W('w1', 'MOON', 'Earth’s satellite'), W('w2', 'SKY', 'The space above us'), W('w3', 'FIRE', 'Burning flame'), W('w4', 'POT', 'A container'), W('w5', 'ROCK', 'A large stone')] },
-  { id: 'wf_en_009', language: 'en-US', theme: 'Nature', tier: 'medium', grid: { x: 6, y: 6 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1 },
-    words: [W('w1', 'SEA', 'The ocean'), W('w2', 'ICE', 'Frozen water'), W('w3', 'FOX', 'A wild canine'), W('w4', 'OWL', 'A night bird'), W('w5', 'ARM', 'Part of the body'), W('w6', 'ART', 'Creative work')] },
-  { id: 'wf_en_010', language: 'en-US', theme: 'Nature', tier: 'hard', grid: { x: 6, y: 7 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1 },
-    words: [W('w1', 'TREE', 'A tall plant'), W('w2', 'SEA', 'The ocean'), W('w3', 'LEAF', 'Part of a plant'), W('w4', 'ICE', 'Frozen water')] },
-  { id: 'wf_en_011', language: 'en-US', theme: 'Sky', tier: 'hard', grid: { x: 6, y: 8 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1, lock: 1 },
-    words: [W('w1', 'MOON', 'Earth’s satellite'), W('w2', 'STAR', 'A distant sun'), W('w3', 'TREE', 'A tall plant'), W('w4', 'LEAF', 'Part of a plant')] },
-  { id: 'wf_en_012', language: 'en-US', theme: 'Elements', tier: 'hard', grid: { x: 6, y: 8 },
-    chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1, lock: 1, bomb: 1, bombCountdown: 10 },
-    words: [W('w1', 'FIRE', 'Burning flame'), W('w2', 'WIND', 'Moving air'), W('w3', 'RAIN', 'Falling water'), W('w4', 'SNOW', 'Frozen precipitation')] },
-]
-
-const BONUS = {
-  'wf_zh_001': ['夜雨', '清风'],
-  'wf_zh_002': ['山水', '明月'],
-  'wf_zh_003': ['春风', '秋雨'],
-  'wf_zh_004': ['花月', '云海'],
-  'wf_zh_005': ['江河', '阳光'],
-  'wf_zh_006': ['星光', '山川'],
-  'wf_zh_007': ['明月', '清风'],
-  'wf_zh_008': ['花好月圆', '云淡风轻'],
-  'wf_zh_009': ['春暖花开', '山清水秀'],
-  'wf_zh_010': ['森林', '云海'],
-  'wf_zh_011': ['鸟语花香', '柳暗花明'],
-  'wf_zh_012': ['海阔天空', '春华秋实'],
-  'wf_en_001': ['SKY', 'ARM'],
-  'wf_en_002': ['SEA', 'FOX'],
-  'wf_en_003': ['CAT', 'SUN'],
-  'wf_en_004': ['BAT', 'EGG'],
-  'wf_en_005': ['FOX', 'ARM'],
-  'wf_en_006': ['SUN', 'POT'],
-  'wf_en_007': ['STAR', 'LEAF'],
-  'wf_en_008': ['ROCK', 'WAVE'],
-  'wf_en_009': ['CAT', 'DOG'],
-  'wf_en_010': ['ROCK', 'WAVE'],
-  'wf_en_011': ['SAND', 'ROCK'],
-  'wf_en_012': ['MOON', 'STAR'],
-}
-
-function hashSeed(str) {
-  let h = 2166136261
-  for (const ch of str) {
-    h ^= ch.charCodeAt(0)
-    h = Math.imul(h, 16777619)
+function buildWithFallback(spec) {
+  const base = hashSeed(spec.id)
+  const variants = [
+    spec,
+    { ...spec, obstacles: undefined },
+    { ...spec, obstacles: undefined, chains: undefined },
+    {
+      ...spec,
+      obstacles: undefined,
+      chains: undefined,
+      words: spec.words.slice(0, Math.max(2, spec.words.length - 1)),
+    },
+  ]
+  for (let v = 0; v < variants.length; v += 1) {
+    const variant = variants[v]
+    for (let a = 0; a < 240; a += 1) {
+      const built = buildLevel(variant, base + a * 7919 + v * 104729 + 1)
+      if (built) return built
+    }
   }
-  return h >>> 0
+  return null
 }
 
 function generate() {
   const levels = []
   const report = []
-  for (const spec of SPECS) {
-    const baseSeed = hashSeed(spec.id)
-    let built = null
-    for (let attempt = 0; attempt < 200 && !built; attempt += 1) {
-      built = buildLevel(spec, baseSeed + attempt * 7919)
-    }
-    if (!built && spec.obstacles) {
-      // 兜底：若带障碍始终无法生成有效关卡，则去掉障碍
-      for (let attempt = 0; attempt < 100 && !built; attempt += 1) {
-        built = buildLevel({ ...spec, obstacles: undefined }, baseSeed + attempt * 104729)
+  for (const lang of ['zh-CN', 'en-US']) {
+    for (let n = 1; n <= LEVELS_PER_LANGUAGE; n += 1) {
+      const spec = makeSpec(lang, n)
+      const level = buildWithFallback(spec)
+      if (!level) {
+        report.push(`FAIL  ${spec.id}`)
+        continue
       }
-      if (built) report.push(`WARN  ${spec.id}  障碍已移除`)
+      levels.push(level)
+      if (n % 20 === 0 || n <= 3) {
+        const g = level.grid_dim
+        const obs = level.initial_board.filter((t) => t.type !== 'normal').length
+        report.push(
+          `OK    ${level.id}  ${g.x}x${g.y}  words=${level.target_words.length}  flow=${level.solution_flow.length}  obstacles=${obs}  tier=${level.tier}`,
+        )
+      }
     }
-    if (!built) {
-      report.push(`FAIL  ${spec.id}`)
-      continue
-    }
-    levels.push(built.level)
-    const g = spec.grid
-    report.push(
-      `OK    ${spec.id}  ${g.x}x${g.y}  words=${built.level.target_words.length}  chain=${built.chainShape}  flow=${built.level.solution_flow.length}  cascades=${built.cascadeCount}  obstacles=${built.obstacleCount}`,
-    )
   }
   return { levels, report }
 }

@@ -240,8 +240,7 @@ export function playExplosion() {
   src.stop(t0 + 0.55)
 }
 
-/** 拆弹：闷响 + 火花嘶声 + 化解音 */
-export function playDefuse() {
+/** 拆弹：闷响 + 火花嘶声 + 化解音 */export function playDefuse() {
   if (!sfxEnabled) return
   const ctx = resumeAudioContext()
   if (!ctx) return
@@ -264,4 +263,29 @@ export function playDefuse() {
 
   tone(880, { start: 0.06, dur: 0.18, type: 'sine', peak: 0.12 })
   tone(1320, { start: 0.12, dur: 0.22, type: 'sine', peak: 0.1 })
+}
+
+/** 石块碎裂：低沉碎响 */
+export function playRockBreak() {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime
+  tone(110, { dur: 0.24, type: 'sine', peak: 0.34, sweepTo: 55 })
+
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const lowpass = ctx.createBiquadFilter()
+  lowpass.type = 'lowpass'
+  lowpass.frequency.value = 900
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.4, t0)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.28)
+  src.connect(lowpass)
+  lowpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.32)
+
+  tone(180, { start: 0.05, dur: 0.2, type: 'triangle', peak: 0.12, sweepTo: 90 })
 }

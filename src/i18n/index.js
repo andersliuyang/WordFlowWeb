@@ -114,6 +114,7 @@ const TIPS = {
     ice: { title: '冰冻方块', body: '冰冻方块需要消除两次；第一次碎裂后会恢复成普通方块。' },
     lock: { title: '锁链方块', body: '锁链方块不能选取；点它可查看需先消除哪个词，解锁后才能拼出它所在的目标词。' },
     bomb: { title: '炸弹方块', body: '炸弹每次提交（含拼错）倒计时 -1；归零会爆炸，把全场方块炸飞并判负，优先拆掉它！' },
+    stone: { title: '石头方块', body: '石头不能选取；消除它相邻的方块即可把它震碎，之后恢复成普通方块。' },
     hint: { title: '提示道具', body: '卡住了？用「提示 / 定向 / 魔棒」，消耗金币或道具帮你脱困。' },
   },
   'en-US': {
@@ -124,6 +125,7 @@ const TIPS = {
     ice: { title: 'Ice tile', body: 'Ice tiles must be cleared twice — the first hit cracks them into a normal tile.' },
     lock: { title: 'Locked tile', body: 'Locked tiles cannot be picked. Tap one to see which word unlocks it.' },
     bomb: { title: 'Bomb tile', body: 'The bomb counter drops on every move (even wrong ones). At zero it explodes and blasts the whole board — defuse it fast!' },
+    stone: { title: 'Stone tile', body: 'Stone cannot be picked. Clear a tile next to it to shatter it into a normal tile.' },
     hint: { title: 'Hints', body: 'Stuck? Use Hint / Target / Wand, costing coins or items, to get unstuck.' },
   },
 }
@@ -156,7 +158,7 @@ const GUIDE = {
     {
       visual: 'obstacles',
       title: '障碍方块',
-      body: '冰：需消除两次（第一次碎裂后恢复成普通方块）；锁：点它可查看需先消除哪个词，解锁后才能拼它所在的词；炸弹：每次提交（含拼错）倒计时 -1，归零爆炸并把全场方块炸飞。',
+      body: '冰：需消除两次（第一次碎裂后恢复成普通方块）；锁：点它可查看需先消除哪个词；炸弹：每次提交（含拼错）倒计时 -1，归零爆炸炸飞全场；石：消除相邻方块即可震碎。',
     },
     {
       visual: 'hint',
@@ -188,7 +190,7 @@ const GUIDE = {
     {
       visual: 'obstacles',
       title: 'Obstacle tiles',
-      body: 'Ice: clear twice (it cracks, then becomes a normal tile). Lock: tap it to see which word unlocks it. Bomb: the counter drops on every move (even wrong ones) — at zero it explodes and blasts the whole board.',
+      body: 'Ice: clear twice (cracks, then becomes a normal tile). Lock: tap it to see which word unlocks it. Bomb: the counter drops on every move — at zero it blasts the whole board. Stone: clear a neighboring tile to shatter it.',
     },
     {
       visual: 'hint',

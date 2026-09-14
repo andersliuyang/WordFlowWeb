@@ -1,5 +1,5 @@
 import { Board, reverseText } from './board.js'
-import { pathHasSturdyIce, crackIce, clearPath, unlockLocks, tickBombs, findCascadeWord } from './rules.js'
+import { pathHasSturdyIce, crackIce, clearPath, unlockLocks, breakStones, tickBombs, findCascadeWord } from './rules.js'
 import { solveBoard } from './level.js'
 
 const COMBO_WINDOW_MS = 3000
@@ -144,6 +144,9 @@ export class GameSession {
     if (result.unlocked.length) {
       events.push({ kind: 'unlock', tiles: result.unlocked.map((t) => ({ x: t.x, y: t.y })) })
     }
+    if (result.broken.length) {
+      events.push({ kind: 'break', tiles: result.broken.map((t) => ({ x: t.x, y: t.y })) })
+    }
 
     this._resolveCascades(events, preFormable, result.event.moves)
 
@@ -160,6 +163,7 @@ export class GameSession {
     this.remaining.delete(word.id)
     const removed = clearPath(this.board, cells)
     const unlocked = unlockLocks(this.board, word.id, cells)
+    const broken = breakStones(this.board, cells)
     const moves = this.board.applyGravity()
 
     const now = this.now()
@@ -187,6 +191,7 @@ export class GameSession {
       },
       clearedBomb,
       unlocked,
+      broken,
     }
   }
 
@@ -205,6 +210,7 @@ export class GameSession {
       this.remaining.delete(found.word.id)
       const removed = clearPath(this.board, found.path)
       const unlocked = unlockLocks(this.board, found.word.id, found.path)
+      const broken = breakStones(this.board, found.path)
       const moves = this.board.applyGravity()
       this.combo += 1
       const gained = Math.round(10 * (1 + 0.2 * this.combo))
@@ -223,6 +229,9 @@ export class GameSession {
       })
       if (unlocked.length) {
         events.push({ kind: 'unlock', tiles: unlocked.map((t) => ({ x: t.x, y: t.y })) })
+      }
+      if (broken.length) {
+        events.push({ kind: 'break', tiles: broken.map((t) => ({ x: t.x, y: t.y })) })
       }
       lastMoves = moves
     }
