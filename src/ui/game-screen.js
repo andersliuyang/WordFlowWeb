@@ -12,6 +12,18 @@ function starsFor(moves, wordCount) {
   return 1
 }
 
+const ICONS = {
+  hint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 1 4 10.4V16H8v-2.6A6 6 0 0 1 12 3z"/></svg>',
+  target:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/></svg>',
+  wand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l10-10"/><path d="M15 3.5l.9 2.1L18 6.5l-2.1.9L15 9.5l-.9-2.1L12 6.5l2.1-.9z" fill="currentColor" stroke="none"/><path d="M19.5 12.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" stroke="none"/></svg>',
+  shuffle:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 4l4 3-4 3"/><path d="M20 7H8a4 4 0 0 0-4 4"/><path d="M16 14l4 3-4 3"/><path d="M20 17H8a4 4 0 0 1-4-4"/></svg>',
+  coin: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="#e7b84f" stroke="#c8912f" stroke-width="1.6"/><circle cx="12" cy="12" r="5.7" fill="none" stroke="#f7dd9b" stroke-width="1.4"/><path d="M9 8.4l3 3.8 3-3.8M12 12.2V16M9.6 12.9h4.8M9.6 14.9h4.8" fill="none" stroke="#8a5a18" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  moves:
+    '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="8.2" cy="9" rx="3.1" ry="4.3"/><circle cx="6.3" cy="4" r="1.1"/><circle cx="9.1" cy="3.3" r="1"/><ellipse cx="16" cy="15.4" rx="3.1" ry="4.3" opacity="0.5"/><circle cx="14.1" cy="10.4" r="1.1" opacity="0.5"/><circle cx="16.9" cy="9.7" r="1" opacity="0.5"/></svg>',
+}
+
 export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
   const session = new GameSession(level)
   const el = document.createElement('div')
@@ -25,19 +37,19 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
           <button class="icon-btn" data-role="guide" type="button" title="${t('guide')}">?</button>
         </div>
         <div class="hud__stats">
-          <span class="stat"><span class="stat__label">${t('moves')}</span><span class="stat__value" data-role="moves">0</span></span>
-          <span class="stat"><span class="stat__label">${t('coins')}</span><span class="stat__value" data-role="coins">0</span></span>
+          <span class="stat"><span class="stat__icon">${ICONS.moves}</span><span class="stat__value" data-role="moves">0</span></span>
+          <span class="stat"><span class="stat__icon">${ICONS.coin}</span><span class="stat__value" data-role="coins">0</span></span>
         </div>
       </header>
       <div class="hud__words" data-role="words"></div>
       <div class="hud__bonus" data-role="bonus"></div>
       <div class="hud__selection" data-role="selection"></div>
       <div class="hud__bottom">
-        <button class="chip-btn" data-role="hint-normal" type="button">${t('hintNormal')} · <b data-role="cost-normal">${HINT_COST.normal}</b></button>
-        <button class="chip-btn" data-role="hint-targeted" type="button">${t('hintTargeted')} · <b>${HINT_COST.targeted}</b></button>
-        <button class="chip-btn" data-role="hint-wand" type="button">${t('hintWand')} · <b>${HINT_COST.wand}</b></button>
-        <button class="chip-btn" data-role="shuffle" type="button">${t('shuffle')} · <b>${SHUFFLE_COST}</b></button>
-        <button class="btn btn--primary submit-btn" data-role="submit" type="button" hidden>确定</button>
+        <button class="chip-btn" data-role="hint-normal" type="button">${ICONS.hint}${t('hintNormal')} ${ICONS.coin}<b data-role="cost-normal">${HINT_COST.normal}</b></button>
+        <button class="chip-btn" data-role="hint-targeted" type="button">${ICONS.target}${t('hintTargeted')} ${ICONS.coin}<b>${HINT_COST.targeted}</b></button>
+        <button class="chip-btn" data-role="hint-wand" type="button">${ICONS.wand}${t('hintWand')} ${ICONS.coin}<b>${HINT_COST.wand}</b></button>
+        <button class="chip-btn" data-role="shuffle" type="button">${ICONS.shuffle}${t('shuffle')} ${ICONS.coin}<b>${SHUFFLE_COST}</b></button>
+        <button class="btn btn--primary submit-btn" data-role="submit" type="button" hidden>${t('confirm')}</button>
       </div>
     </div>
     <div class="result" data-role="result" hidden></div>
@@ -125,18 +137,38 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
     onSubmit(cells) {
       handleResolution(session.submitPath(cells))
     },
+    onLockedTap(tile) {
+      const keyWord = level.target_words.find((w) => w.id === tile.lockKey)
+      if (keyWord) {
+        showToast(`${t('lockKeyHint')}「${keyWord.text}」`)
+        flashWordChip(keyWord.id)
+      } else {
+        showToast(t('lockAdjacent'))
+      }
+    },
   })
   scene.sync(session.board)
+
+  function flashWordChip(id) {
+    const chip = wordsEl.querySelector(`[data-word-id="${id}"]`)
+    if (!chip) return
+    chip.classList.remove('word-chip--flash')
+    void chip.offsetWidth
+    chip.classList.add('word-chip--flash')
+  }
 
   function updateHud() {
     movesEl.textContent = level.move_limit ? `${session.moves}/${level.move_limit}` : String(session.moves)
     coinsEl.textContent = String(saveStore.wallet.coins)
-    normalBtn.innerHTML = `${t('hintNormal')} · <b>${saveStore.hintCount('normal') > 0 ? `x${saveStore.hintCount('normal')}` : HINT_COST.normal}</b>`
+    const itemCount = saveStore.hintCount('normal')
+    normalBtn.innerHTML = `${ICONS.hint}${t('hintNormal')} ${
+      itemCount > 0 ? `×${itemCount}` : `${ICONS.coin}<b>${HINT_COST.normal}</b>`
+    }`
 
     wordsEl.innerHTML = level.target_words
       .map((word) => {
         const done = session.completed.has(word.id)
-        return `<span class="word-chip ${done ? 'word-chip--done' : ''}" title="${word.hint_text || ''}">${word.text}</span>`
+        return `<span class="word-chip ${done ? 'word-chip--done' : ''}" data-word-id="${word.id}" title="${word.hint_text || ''}">${word.text}</span>`
       })
       .join('')
 
@@ -168,13 +200,15 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
   }
 
   function handleResolution(res) {
-    if (!res || res.type === 'invalid') {
-      if (res) playFail()
-      if (res) showToast(t('invalid'))
-      return
-    }
+    if (!res || res.type === 'noop') return
 
     const events = res.events || []
+    const invalid = res.type === 'invalid'
+    if (invalid) {
+      playFail()
+      showToast(t('invalid'))
+    }
+
     const boardChanged = events.some((e) => e.kind === 'clear' || e.kind === 'crack')
 
     for (const event of events) {
@@ -186,7 +220,8 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
       }
     }
 
-    if (!boardChanged) {
+    // 无效提交也可能推进炸弹（bombTick / bombExplode），需要播放动画
+    if (!boardChanged && !events.some((e) => e.kind === 'bombTick' || e.kind === 'bombExplode')) {
       scene.sync(session.board)
       updateHud()
       return
@@ -311,6 +346,13 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
 
   updateHud()
   scheduleInitialTips()
+
+  if (import.meta.env.DEV) {
+    window.__wfGame = {
+      session,
+      submit: (cells) => handleResolution(session.submitPath(cells)),
+    }
+  }
 
   return {
     el,

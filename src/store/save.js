@@ -2,7 +2,7 @@ const STORAGE_KEY = 'wordflow.save.v1'
 
 const DEFAULT_SAVE = {
   version: 1,
-  settings: { language: 'zh-CN', sfx: true, bgm: true, volume: 0.6 },
+  settings: { language: null, sfx: true, bgm: true, volume: 0.6 },
   progress: { completed: {} },
   wallet: { coins: 200, hints: { normal: 3, targeted: 1, wand: 0 } },
   stats: { totalWords: 0, totalCombos: 0 },

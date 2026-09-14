@@ -94,6 +94,7 @@ function buildBoard(spec, random) {
   const rows = grid.y
   const cells = Array.from({ length: rows }, () => Array(cols).fill(null))
   const byId = new Map(words.map((w) => [w.id, w]))
+  const wordCells = new Map()
 
   const chains = (spec.chains || []).filter((chain) =>
     chain.reduce((sum, id) => sum + byId.get(id).text.length, 0) <= rows,
@@ -109,12 +110,17 @@ function buildBoard(spec, random) {
     const bottomPad = Math.floor(random() * (slack + 1))
     const top = slack - bottomPad
     seq.forEach((cell, i) => {
-      cells[top + i][column] = byId.get(cell.id).text[cell.index]
+      const y = top + i
+      cells[y][column] = byId.get(cell.id).text[cell.index]
+      if (!wordCells.has(cell.id)) wordCells.set(cell.id, [])
+      wordCells.get(cell.id).push([column, y])
     })
   }
 
   for (const word of shuffle(words.filter((w) => !chained.has(w.id)).slice(), random)) {
-    if (!tryPlaceStraight(cells, cols, rows, word.text, random)) return null
+    const path = tryPlaceStraight(cells, cols, rows, word.text, random)
+    if (!path) return null
+    wordCells.set(word.id, path)
   }
 
   const targetTexts = new Set(words.map((w) => w.text))
@@ -132,28 +138,48 @@ function buildBoard(spec, random) {
     }
   }
 
-  return { rows: cells.map((row) => row.join('')), bonus: bonusPlaced }
+  return { rows: cells.map((row) => row.join('')), bonus: bonusPlaced, wordCells }
 }
 
-function assignObstacles(spec, random) {
-  const obstacles = {}
+/**
+ * 障碍只放在目标词的格子上，保证真正参与玩法；
+ * 锁链的 lockKey 选另一个不占用该格的词。
+ */
+function assignObstacles(spec, wordCells, random) {
   const plan = spec.obstacles || {}
-  const cells = []
-  for (let y = 0; y < spec.grid.y; y += 1) {
-    for (let x = 0; x < spec.grid.x; x += 1) cells.push([x, y])
+  const obstacles = {}
+  const used = new Set()
+  const entries = [...wordCells.entries()]
+
+  const pickCell = () => {
+    for (const [id, cells] of shuffle(entries.slice(), random)) {
+      for (const [x, y] of shuffle(cells.slice(), random)) {
+        const key = `${x},${y}`
+        if (!used.has(key)) return { id, x, y, key }
+      }
+    }
+    return null
   }
-  shuffle(cells, random)
-  const kinds = []
-  for (let i = 0; i < (plan.ice || 0); i += 1) kinds.push('ice')
-  for (let i = 0; i < (plan.bomb || 0); i += 1) kinds.push('bomb')
-  for (let i = 0; i < (plan.lock || 0); i += 1) kinds.push('lock')
-  kinds.forEach((kind, index) => {
-    const [x, y] = cells[index]
-    if (x === undefined) return
-    if (kind === 'ice') obstacles[`${x},${y}`] = { type: 'ice', hp: 2 }
-    if (kind === 'bomb') obstacles[`${x},${y}`] = { type: 'bomb', countdown: plan.bombCountdown || 6 }
-    if (kind === 'lock') obstacles[`${x},${y}`] = { type: 'lock', lockKey: null }
-  })
+
+  const add = (type, extra) => {
+    const cell = pickCell()
+    if (!cell) return
+    obstacles[cell.key] = { type, ...extra }
+    used.add(cell.key)
+  }
+
+  for (let i = 0; i < (plan.ice || 0); i += 1) add('ice', { hp: 2 })
+  for (let i = 0; i < (plan.bomb || 0); i += 1) add('bomb', { countdown: plan.bombCountdown || 7 })
+  for (let i = 0; i < (plan.lock || 0); i += 1) {
+    const cell = pickCell()
+    if (!cell) continue
+    const candidates = spec.words.filter(
+      (w) => w.id !== cell.id && !(wordCells.get(w.id) || []).some(([x, y]) => x === cell.x && y === cell.y),
+    )
+    const keyWord = candidates.length ? candidates[Math.floor(random() * candidates.length)] : null
+    obstacles[cell.key] = { type: 'lock', lockKey: keyWord ? keyWord.id : null }
+    used.add(cell.key)
+  }
   return obstacles
 }
 
@@ -163,7 +189,7 @@ function buildLevel(spec, seed) {
   const built = buildBoard({ ...spec, bonus: bonusList }, random)
   if (!built) return null
 
-  const obstacles = assignObstacles(spec, random)
+  const obstacles = assignObstacles(spec, built.wordCells, random)
   const def = {
     id: spec.id,
     language: spec.language,
@@ -195,8 +221,21 @@ function buildLevel(spec, seed) {
   if (!flow) return null
   level.solution_flow = flow
 
+  // 校验：每个障碍都必须出现在某一步的消除路径里（否则就是无效装饰）
+  const usedCells = new Set()
+  for (const step of flow) {
+    for (const [x, y] of step.path) usedCells.add(`${x},${y}`)
+    for (const cascade of step.cascades || []) {
+      for (const [x, y] of cascade.path) usedCells.add(`${x},${y}`)
+    }
+  }
+  for (const tile of level.initial_board) {
+    if (tile.type !== 'normal' && !usedCells.has(`${tile.x},${tile.y}`)) return null
+  }
+
   const cascadeCount = flow.reduce((sum, step) => sum + (step.cascades ? step.cascades.length : 0), 0)
-  return { level, cascadeCount, chainShape: (spec.chains || []).map((c) => c.length).join('+') || '-' }
+  const obstacleCount = level.initial_board.filter((t) => t.type !== 'normal').length
+  return { level, cascadeCount, chainShape: (spec.chains || []).map((c) => c.length).join('+') || '-', obstacleCount }
 }
 
 const W = (id, text, hint) => ({ id, text, hint })
@@ -231,10 +270,11 @@ const SPECS = [
     words: [W('w1', '海阔天空', '形容广阔无边'), W('w2', '春风', '春天的风'), W('w3', '星光', '星星的光'), W('w4', '山川', '山与河流'), W('w5', '花草', '花与草'), W('w6', '江河', '江与河')] },
   { id: 'wf_zh_010', language: 'zh-CN', theme: '四季', tier: 'hard', grid: { x: 6, y: 6 },
     chains: [['w1', 'w2', 'w3'], ['w4', 'w5']],
+    obstacles: { ice: 1 },
     words: [W('w1', '春风', '春天的风'), W('w2', '夏雨', '夏天的雨'), W('w3', '秋月', '秋天的月'), W('w4', '江河', '江与河'), W('w5', '花草', '花与草')] },
   { id: 'wf_zh_011', language: 'zh-CN', theme: '自然', tier: 'hard', grid: { x: 6, y: 7 },
     chains: [['w1', 'w2'], ['w3', 'w4']],
-    obstacles: { ice: 1 },
+    obstacles: { ice: 1, bomb: 1, bombCountdown: 8 },
     words: [W('w1', '云淡风轻', '形容天气晴好'), W('w2', '青山', '青翠的山'), W('w3', '花好月圆', '美好圆满'), W('w4', '绿水', '碧绿的水')] },
   { id: 'wf_zh_012', language: 'zh-CN', theme: '自然', tier: 'hard', grid: { x: 6, y: 8 },
     chains: [['w1', 'w2', 'w3'], ['w4', 'w5']],
@@ -266,6 +306,7 @@ const SPECS = [
     words: [W('w1', 'MOON', 'Earth’s satellite'), W('w2', 'SKY', 'The space above us'), W('w3', 'FIRE', 'Burning flame'), W('w4', 'POT', 'A container'), W('w5', 'ROCK', 'A large stone')] },
   { id: 'wf_en_009', language: 'en-US', theme: 'Nature', tier: 'medium', grid: { x: 6, y: 6 },
     chains: [['w1', 'w2'], ['w3', 'w4']],
+    obstacles: { ice: 1 },
     words: [W('w1', 'SEA', 'The ocean'), W('w2', 'ICE', 'Frozen water'), W('w3', 'FOX', 'A wild canine'), W('w4', 'OWL', 'A night bird'), W('w5', 'ARM', 'Part of the body'), W('w6', 'ART', 'Creative work')] },
   { id: 'wf_en_010', language: 'en-US', theme: 'Nature', tier: 'hard', grid: { x: 6, y: 7 },
     chains: [['w1', 'w2'], ['w3', 'w4']],
@@ -321,10 +362,17 @@ function generate() {
   const levels = []
   const report = []
   for (const spec of SPECS) {
-    let built = null
     const baseSeed = hashSeed(spec.id)
-    for (let attempt = 0; attempt < 160 && !built; attempt += 1) {
+    let built = null
+    for (let attempt = 0; attempt < 200 && !built; attempt += 1) {
       built = buildLevel(spec, baseSeed + attempt * 7919)
+    }
+    if (!built && spec.obstacles) {
+      // 兜底：若带障碍始终无法生成有效关卡，则去掉障碍
+      for (let attempt = 0; attempt < 100 && !built; attempt += 1) {
+        built = buildLevel({ ...spec, obstacles: undefined }, baseSeed + attempt * 104729)
+      }
+      if (built) report.push(`WARN  ${spec.id}  障碍已移除`)
     }
     if (!built) {
       report.push(`FAIL  ${spec.id}`)
@@ -332,11 +380,8 @@ function generate() {
     }
     levels.push(built.level)
     const g = spec.grid
-    const lens = built.level.solution_flow
-      .map((s) => s.text.length)
-      .join('/')
     report.push(
-      `OK    ${spec.id}  ${g.x}x${g.y}  words=${built.level.target_words.length}  chain=${built.chainShape}  lens=${lens}  flow=${built.level.solution_flow.length}  cascades=${built.cascadeCount}`,
+      `OK    ${spec.id}  ${g.x}x${g.y}  words=${built.level.target_words.length}  chain=${built.chainShape}  flow=${built.level.solution_flow.length}  cascades=${built.cascadeCount}  obstacles=${built.obstacleCount}`,
     )
   }
   return { levels, report }

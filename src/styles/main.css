@@ -398,7 +398,7 @@ body {
 
 .stat {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 6px;
   padding: 8px 14px;
   border-radius: 999px;
@@ -406,6 +406,17 @@ body {
   border: 1px solid rgba(85, 78, 69, 0.1);
   font-size: 13px;
   color: var(--muted);
+}
+
+.stat__icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.stat__icon svg {
+  width: 17px;
+  height: 17px;
+  display: block;
 }
 
 .stat__value {
@@ -523,6 +534,9 @@ body {
 }
 
 .chip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 11px 18px;
   border-radius: 999px;
   border: 1px solid rgba(85, 78, 69, 0.14);
@@ -532,6 +546,12 @@ body {
   font-size: 14px;
   cursor: pointer;
   transition: transform 0.15s ease, background 0.2s ease;
+}
+
+.chip-btn svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
 }
 
 .chip-btn:hover {

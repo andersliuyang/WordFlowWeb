@@ -84,21 +84,44 @@ export class GameSession {
   submitPath(cells) {
     if (this.status !== 'playing') return { type: 'noop', events: [] }
     const tiles = cells.map(([x, y]) => this.board.get(x, y)).filter(Boolean)
-    if (!tiles.length) return { type: 'invalid', events: [] }
-    const text = tiles.map((tile) => tile.char).join('')
-    const reversed = reverseText(text)
-
-    const wordId = this.wordIdForText(text)
-    if (wordId) {
-      return this._resolveWord(this.remaining.get(wordId), cells)
+    let result
+    if (!tiles.length) {
+      result = { type: 'invalid', events: [] }
+    } else {
+      const text = tiles.map((tile) => tile.char).join('')
+      const reversed = reverseText(text)
+      const wordId = this.wordIdForText(text)
+      if (wordId) {
+        result = this._resolveWord(this.remaining.get(wordId), cells)
+      } else {
+        const bonus = this.bonusDictionary.find((entry) => entry === text || entry === reversed)
+        if (bonus && !this.completed.has(`bonus:${bonus}`) && !this.bonusCollected.includes(bonus)) {
+          result = this._resolveBonus(bonus)
+        } else {
+          result = { type: 'invalid', events: [] }
+        }
+      }
     }
+    return this._finishTurn(result)
+  }
 
-    const bonus = this.bonusDictionary.find((entry) => entry === text || entry === reversed)
-    if (bonus && !this.completed.has(`bonus:${bonus}`) && !this.bonusCollected.includes(bonus)) {
-      return this._resolveBonus(bonus)
+  /** 每次提交（无论成败）结算一次炸弹倒计时。 */
+  _finishTurn(result) {
+    const { ticked, exploded } = this._tickBombsAndCollect()
+    if (ticked.length) {
+      result.events.push({
+        kind: 'bombTick',
+        tiles: ticked.map((t) => ({ x: t.x, y: t.y, countdown: t.countdown })),
+      })
     }
-
-    return { type: 'invalid', events: [] }
+    if (exploded.length) {
+      result.events.push({ kind: 'bombExplode', tiles: exploded.map((t) => ({ x: t.x, y: t.y })) })
+    }
+    this._advanceTurn(exploded)
+    result.status = this.status
+    result.reason = this.reason
+    if (result.combo === undefined) result.combo = this.combo
+    return result
   }
 
   _resolveWord(word, cells) {
@@ -110,7 +133,6 @@ export class GameSession {
       return { type: 'target', events, combo: this.combo, status: this.status }
     }
 
-    // 移动前就可拼出的词不参与级联
     const preFormable = new Set()
     for (const entry of this.remaining.values()) {
       if (entry.id === word.id) continue
@@ -119,18 +141,17 @@ export class GameSession {
 
     const result = this._clearWord(word, cells, { countMove: true })
     events.push(result.event)
+    if (result.unlocked.length) {
+      events.push({ kind: 'unlock', tiles: result.unlocked.map((t) => ({ x: t.x, y: t.y })) })
+    }
 
-    this._resolveCascades(events, preFormable)
-
-    this._advanceTurn(result.clearedBomb)
+    this._resolveCascades(events, preFormable, result.event.moves)
 
     return {
       type: 'target',
       events,
       combo: this.combo,
       coinsGained: this.coins,
-      status: this.status,
-      reason: this.reason,
     }
   }
 
@@ -138,7 +159,7 @@ export class GameSession {
     this.completed.add(word.id)
     this.remaining.delete(word.id)
     const removed = clearPath(this.board, cells)
-    unlockLocks(this.board, word.id, cells)
+    const unlocked = unlockLocks(this.board, word.id, cells)
     const moves = this.board.applyGravity()
 
     const now = this.now()
@@ -165,11 +186,12 @@ export class GameSession {
         cascade: false,
       },
       clearedBomb,
+      unlocked,
     }
   }
 
-  _resolveCascades(events, preFormable) {
-    let lastMoves = events.length ? events[events.length - 1].moves : []
+  _resolveCascades(events, preFormable, initialMoves) {
+    let lastMoves = initialMoves || []
     let guard = 0
     while (guard < 20) {
       guard += 1
@@ -182,7 +204,7 @@ export class GameSession {
       this.completed.add(found.word.id)
       this.remaining.delete(found.word.id)
       const removed = clearPath(this.board, found.path)
-      unlockLocks(this.board, found.word.id, found.path)
+      const unlocked = unlockLocks(this.board, found.word.id, found.path)
       const moves = this.board.applyGravity()
       this.combo += 1
       const gained = Math.round(10 * (1 + 0.2 * this.combo))
@@ -199,6 +221,9 @@ export class GameSession {
         coins: gained,
         cascade: true,
       })
+      if (unlocked.length) {
+        events.push({ kind: 'unlock', tiles: unlocked.map((t) => ({ x: t.x, y: t.y })) })
+      }
       lastMoves = moves
     }
   }
@@ -206,6 +231,12 @@ export class GameSession {
   _findCascadeWord(movedSet, preFormable) {
     const found = findCascadeWord(this.board, [...this.remaining.values()], movedSet, preFormable)
     return found
+  }
+
+  _tickBombsAndCollect() {
+    const exploded = tickBombs(this.board)
+    const ticked = this.board.tiles().filter((tile) => tile.type === 'bomb')
+    return { ticked, exploded }
   }
 
   _resolveBonus(word) {
@@ -220,13 +251,12 @@ export class GameSession {
     return { type: 'bonus', events, combo: this.combo, coinsGained: this.coins, status: this.status }
   }
 
-  _advanceTurn() {
+  _advanceTurn(exploded) {
     if (this.remaining.size === 0) {
       this.status = 'won'
       return
     }
-    const exploded = tickBombs(this.board)
-    if (exploded.length > 0) {
+    if (exploded && exploded.length > 0) {
       this.status = 'lost'
       this.reason = 'bomb'
       return
@@ -352,7 +382,7 @@ export class GameSession {
     let hint = this.findHint()
     if (!hint && this.shuffle()) hint = this.findHint()
     if (!hint) return null
-    return this._resolveWord(hint.word, hint.path)
+    return this._finishTurn(this._resolveWord(hint.word, hint.path))
   }
 
   snapshot() {

@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { createGlyphTexture } from '../render/tile-texture.js'
-import { playClear, playSelect, playSlide, playImpact, playShatter } from '../audio/sfx.js'
+import { playClear, playSelect, playSlide, playImpact, playShatter, playIceBreak, playUnlock, playTick, playExplosion, playDefuse } from '../audio/sfx.js'
 
 const TILE_SIZE = 1
 const SPACING = 1.16
@@ -10,12 +10,12 @@ const DECAL_GEO = new THREE.PlaneGeometry(0.66, 0.66)
 const SHARD_GEO = new THREE.BoxGeometry(0.17, 0.17, 0.17)
 
 function decalKey(tile) {
-  return [tile.char, tile.type, tile.countdown ?? 0, tile.locked ? 1 : 0].join('|')
+  return [tile.char, tile.type, tile.hp ?? '', tile.countdown ?? 0, tile.locked ? 1 : 0].join('|')
 }
 
 function tileColor(tile) {
-  if (tile.type === 'ice') return (tile.hp || 1) > 1 ? 0xbfe0ec : 0xd9eff7
-  if (tile.type === 'lock') return tile.locked ? 0xc6ccd6 : 0xe8dccb
+  if (tile.type === 'ice') return (tile.hp || 1) > 1 ? 0xbfe0ec : 0xf0e4d6
+  if (tile.type === 'lock') return tile.locked ? 0xc6ccd6 : 0xf0e4d6
   if (tile.type === 'bomb') return 0xf0d7d0
   return 0xf0e4d6
 }
@@ -64,6 +64,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
   let busy = false
   let shake = 0
   let lastSlideAt = 0
+  let downWasSingleSelected = false
   let selection = []
   let selecting = false
   let moved = false
@@ -96,14 +97,19 @@ export function createGameScene(canvas, level, callbacks = {}) {
     const sinTilt = Math.sin(tilt)
     const boardW = (cols - 1) * SPACING + TILE_SIZE
     const boardH = ((rows - 1) * SPACING + TILE_SIZE) * sinTilt
-    const topInset = Math.min(150, height * 0.2)
-    const bottomInset = Math.min(130, height * 0.16)
-    const sideInset = Math.max(20, width * 0.07)
+
+    // 横屏 / 桌面：预留更大 HUD 空间，并把棋盘缩到约 80%
+    const wide = width >= 900 && height >= 600
+    const topInset = Math.min(wide ? 190 : 150, height * (wide ? 0.26 : 0.2))
+    const bottomInset = Math.min(wide ? 150 : 130, height * (wide ? 0.2 : 0.16))
+    const sideInset = Math.max(20, width * (wide ? 0.1 : 0.07))
+    const shrink = wide ? 1.08 : 1
     const safeH = Math.max(140, height - topInset - bottomInset)
     const safeW = Math.max(140, width - sideInset * 2)
+
     const distW = (boardW * width) / (2 * tanHalf * camera.aspect * safeW)
     const distH = (boardH * height) / (2 * tanHalf * safeH)
-    const dist = Math.max(distW, distH)
+    const dist = Math.max(distW, distH) * shrink
     camera.position.set(0, sinTilt * dist, Math.cos(tilt) * dist)
     camera.lookAt(0, 0, 0)
     camera.updateProjectionMatrix()
@@ -171,17 +177,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
       view.targetScale = 1
       view.mesh.visible = true
 
-      const dk = decalKey(tile)
-      if (view.decalKey !== dk) {
-        view.decalMaterial.map = createGlyphTexture(tile.char, tile)
-        view.decalKey = dk
-        view.decalMaterial.needsUpdate = true
-      }
-      const color = tileColor(tile)
-      if (view.colorKey !== color) {
-        view.material.color.setHex(color)
-        view.colorKey = color
-      }
+      updateTileVisual(view)
     }
 
     for (const [id, view] of views) {
@@ -241,7 +237,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     return Math.abs(a[0] - b[0]) <= 1 && Math.abs(a[1] - b[1]) <= 1
   }
 
-  function pick(event) {
+  function pickAny(event) {
     const rect = canvas.getBoundingClientRect()
     pointerNDC.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
     pointerNDC.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
@@ -252,7 +248,11 @@ export function createGameScene(canvas, level, callbacks = {}) {
     }
     const hits = raycaster.intersectObjects(targets, false)
     if (!hits.length) return null
-    const tile = hits[0].object.userData.tile
+    return hits[0].object.userData.tile || null
+  }
+
+  function pick(event) {
+    const tile = pickAny(event)
     if (!tile || tile.locked) return null
     return tile
   }
@@ -282,8 +282,12 @@ export function createGameScene(canvas, level, callbacks = {}) {
 
   function onPointerDown(event) {
     if (disposed || busy) return
-    const tile = pick(event)
+    const tile = pickAny(event)
     if (!tile) return
+    if (tile.locked) {
+      callbacks.onLockedTap?.(tile)
+      return
+    }
     selecting = true
     moved = false
     downPoint = { x: event.clientX, y: event.clientY }
@@ -291,6 +295,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
 
     const cell = [tile.x, tile.y]
     const last = selection[selection.length - 1]
+    downWasSingleSelected = !!last && selection.length === 1 && last[0] === cell[0] && last[1] === cell[1]
     if (last && last[0] === cell[0] && last[1] === cell[1] && selection.length > 1) {
       selection = selection.slice(0, -1)
       applySelectionHighlight()
@@ -321,6 +326,9 @@ export function createGameScene(canvas, level, callbacks = {}) {
     if (moved) {
       if (selection.length >= 2 && text) callbacks.onSubmit?.(selection.slice())
       clearSelection()
+    } else if (downWasSingleSelected) {
+      // 再次点击已选中的单个方块 → 取消选中
+      clearSelection()
     }
   }
 
@@ -330,8 +338,17 @@ export function createGameScene(canvas, level, callbacks = {}) {
   canvas.addEventListener('pointercancel', onPointerUp)
 
   // ---------- particles ----------
-  function burstAtWorld(center) {
-    const count = 20
+  function burstAtWorld(center, opts = {}) {
+    const {
+      color = 0xe8b06a,
+      count = 20,
+      size = 0.18,
+      speedMin = 0.05,
+      speedMax = 0.12,
+      up = 0.06,
+      gravity = 0.5,
+      ttl = 0.75,
+    } = opts
     const positions = new Float32Array(count * 3)
     const velocities = []
     for (let i = 0; i < count; i += 1) {
@@ -339,15 +356,15 @@ export function createGameScene(canvas, level, callbacks = {}) {
       positions[i * 3 + 1] = center.y
       positions[i * 3 + 2] = center.z
       const angle = (i / count) * Math.PI * 2
-      const speed = 0.05 + Math.random() * 0.07
-      velocities.push(new THREE.Vector3(Math.cos(angle) * speed, 0.06 + Math.random() * 0.07, Math.sin(angle) * speed))
+      const speed = speedMin + Math.random() * (speedMax - speedMin)
+      velocities.push(new THREE.Vector3(Math.cos(angle) * speed, up + Math.random() * up, Math.sin(angle) * speed))
     }
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    const material = new THREE.PointsMaterial({ color: 0xe8b06a, size: 0.18, transparent: true, opacity: 1, depthWrite: false })
+    const material = new THREE.PointsMaterial({ color, size, transparent: true, opacity: 1, depthWrite: false })
     const points = new THREE.Points(geometry, material)
     scene.add(points)
-    bursts.push({ points, geometry, material, velocities, life: 0, ttl: 0.75 })
+    bursts.push({ points, geometry, material, velocities, gravity, life: 0, ttl })
   }
 
   function burst(cells) {
@@ -371,6 +388,127 @@ export function createGameScene(canvas, level, callbacks = {}) {
     window.setTimeout(() => el.remove(), 950)
   }
 
+  function updateTileVisual(view) {
+    if (!view) return
+    const tile = view.tile
+    const dk = decalKey(tile)
+    if (view.decalKey !== dk) {
+      view.decalMaterial.map = createGlyphTexture(tile.char, tile)
+      view.decalKey = dk
+      view.decalMaterial.needsUpdate = true
+    }
+    const color = tileColor(tile)
+    if (view.colorKey !== color) {
+      view.material.color.setHex(color)
+      view.colorKey = color
+    }
+  }
+
+  function tileViewsAt(cells) {
+    return cells
+      .map(({ x, y }) => findTileAt(x, y))
+      .filter(Boolean)
+      .map((t) => views.get(t.id))
+      .filter(Boolean)
+  }
+
+  function flashViews(list, duration, done) {
+    if (!list.length) {
+      done()
+      return
+    }
+    list.forEach((v) => {
+      v.manual = true
+    })
+    let t = 0
+    anims.push({
+      update(dt) {
+        t += dt
+        const p = Math.min(1, t / duration)
+        const s = 1 + Math.sin(p * Math.PI) * 0.16
+        list.forEach((v) => v.mesh.scale.setScalar(s))
+        if (p >= 1) {
+          list.forEach((v) => {
+            v.mesh.scale.setScalar(1)
+            v.manual = false
+          })
+          done()
+          return true
+        }
+        return false
+      },
+    })
+  }
+
+  function holdStep(duration, done) {
+    let t = 0
+    anims.push({
+      update(dt) {
+        t += dt
+        if (t >= duration) {
+          done()
+          return true
+        }
+        return false
+      },
+    })
+  }
+
+  /** 炸弹爆炸：从炸点把全场方块轰飞，散开后坠落出地图 */
+  function blowUpAll(center, done) {
+    const list = []
+    for (const view of views.values()) {
+      view.manual = true
+      const pos = view.mesh.position
+      const dir = pos.clone().sub(center)
+      if (dir.lengthSq() < 1e-4) dir.set(Math.random() - 0.5, 0.6, Math.random() - 0.5)
+      dir.normalize()
+      const dist = Math.max(0.25, pos.distanceTo(center))
+      const power = 1.6 + 5 / (0.6 + dist)
+      list.push({
+        view,
+        vel: dir
+          .multiplyScalar(power * (0.5 + Math.random() * 0.6))
+          .add(new THREE.Vector3(0, 0.4 + Math.random() * 1.1, 0)),
+        spin: new THREE.Vector3((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16, (Math.random() - 0.5) * 16),
+      })
+    }
+
+    burstAtWorld(center, { color: 0xffb24a, count: 60, size: 0.34, ttl: 1.1, speedMin: 0.12, speedMax: 0.3, up: 0.18, gravity: 1.0 })
+    burstAtWorld(center, { color: 0xd97b6c, count: 40, size: 0.28, ttl: 1.1, speedMin: 0.08, speedMax: 0.22, up: 0.14, gravity: 1.0 })
+    shake = 0.6
+    playExplosion()
+    vibrate([40, 40, 90])
+
+    let t = 0
+    anims.push({
+      update(dt) {
+        t += dt
+        let allOut = true
+        for (const item of list) {
+          const mesh = item.view.mesh
+          mesh.position.addScaledVector(item.vel, dt)
+          item.vel.y -= 20 * dt
+          mesh.rotation.x += item.spin.x * dt
+          mesh.rotation.y += item.spin.y * dt
+          mesh.rotation.z += item.spin.z * dt
+          if (mesh.position.y > -9) allOut = false
+        }
+        if (allOut || t >= 1.6) {
+          for (const item of list) {
+            if (views.has(item.view.tile.id)) {
+              disposeView(item.view)
+              views.delete(item.view.tile.id)
+            }
+          }
+          done()
+          return true
+        }
+        return false
+      },
+    })
+  }
+
   function setOpacity(view, value) {
     view.material.transparent = true
     view.material.opacity = value
@@ -378,8 +516,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     view.material.needsUpdate = true
   }
 
-  function spawnShards(hex, pos) {
-    const count = 9
+  function spawnShards(hex, pos, count = 9) {
     for (let i = 0; i < count; i += 1) {
       const mat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 1 })
       const mesh = new THREE.Mesh(SHARD_GEO, mat)
@@ -397,6 +534,31 @@ export function createGameScene(canvas, level, callbacks = {}) {
     }
   }
 
+  function shockwave(center, color = 0xffd27a) {
+    const geo = new THREE.RingGeometry(0.18, 0.3, 36)
+    const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false })
+    const mesh = new THREE.Mesh(geo, mat)
+    mesh.position.copy(center)
+    mesh.rotation.x = -Math.PI / 2
+    group.add(mesh)
+    let t = 0
+    anims.push({
+      update(dt) {
+        t += dt
+        const p = Math.min(1, t / 0.45)
+        mesh.scale.setScalar(0.6 + p * 5)
+        mat.opacity = Math.max(0, 0.9 * (1 - p))
+        if (p >= 1) {
+          group.remove(mesh)
+          geo.dispose()
+          mat.dispose()
+          return true
+        }
+        return false
+      },
+    })
+  }
+
   function pulseTiles(path, done) {
     const targets = path.map(([x, y]) => findTileAt(x, y)).filter(Boolean).map((t) => views.get(t.id)).filter(Boolean)
     targets.forEach((v) => {
@@ -406,8 +568,8 @@ export function createGameScene(canvas, level, callbacks = {}) {
     anims.push({
       update(dt) {
         t += dt
-        const p = Math.min(1, t / 0.26)
-        const s = 1 + Math.sin(p * Math.PI) * 0.18
+        const p = Math.min(1, t / 0.3)
+        const s = 1 + Math.sin(p * Math.PI) * 0.3
         targets.forEach((v) => v.mesh.scale.setScalar(s))
         if (p >= 1) {
           targets.forEach((v) => {
@@ -428,6 +590,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     busy = true
     if (selection.length) clearSelection()
 
+    let skipFinalSync = false
     const originPositions = new Map()
     for (const [id, view] of views) originPositions.set(id, view.mesh.position.clone())
 
@@ -440,7 +603,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     function nextStep() {
       if (index >= events.length) {
         busy = false
-        sync(finalBoard)
+        if (!skipFinalSync) sync(finalBoard)
         opts.onDone?.()
         return
       }
@@ -449,8 +612,49 @@ export function createGameScene(canvas, level, callbacks = {}) {
       opts.onEvent?.(ev)
 
       if (ev.kind === 'crack') {
-        playSelect()
+        const vs = tileViewsAt(ev.path.map(([x, y]) => ({ x, y })))
+        vs.forEach((v) => {
+          updateTileVisual(v)
+          burstAtWorld(v.mesh.position, {
+            color: 0xdff2fb,
+            count: 34,
+            size: 0.32,
+            ttl: 0.8,
+            speedMin: 0.09,
+            speedMax: 0.22,
+            up: 0.16,
+            gravity: 0.7,
+          })
+          spawnShards(0xbfe6f5, v.mesh.position, 14)
+          shockwave(v.mesh.position, 0xaee3f5)
+        })
+        shake = Math.max(shake, 0.26)
+        vibrate(28)
+        playIceBreak()
         pulseTiles(ev.path, nextStep)
+      } else if (ev.kind === 'unlock') {
+        const vs = tileViewsAt(ev.tiles)
+        vs.forEach((v) => {
+          updateTileVisual(v)
+          burstAtWorld(v.mesh.position, { color: 0xe2b25e, count: 16, size: 0.12, ttl: 0.6, up: 0.12 })
+        })
+        playUnlock()
+        flashViews(vs, 0.32, nextStep)
+      } else if (ev.kind === 'bombTick') {
+        const vs = tileViewsAt(ev.tiles)
+        vs.forEach((v) => {
+          updateTileVisual(v)
+          if ((v.tile.countdown || 0) <= 2) {
+            burstAtWorld(v.mesh.position, { color: 0xd97b6c, count: 8, size: 0.12, ttl: 0.5, up: 0.09 })
+          }
+        })
+        playTick()
+        flashViews(vs, 0.18, nextStep)
+      } else if (ev.kind === 'bombExplode') {
+        const vs = tileViewsAt(ev.tiles)
+        const center = vs.length ? vs[0].mesh.position.clone() : new THREE.Vector3()
+        skipFinalSync = true
+        blowUpAll(center, nextStep)
       } else if (ev.kind === 'clear') {
         animateClear(ev, cascadeIds, originPositions, nextStep)
       } else {
@@ -505,7 +709,13 @@ export function createGameScene(canvas, level, callbacks = {}) {
           })
           if (p >= 1) {
             // 硬碰撞：破碎成小块 + 粒子 + 词名 + 震动 + 音效
-            removedViews.forEach((v) => spawnShards(v.material.color.getHex(), v.mesh.position))
+            const bombHex = 0xffd27a
+            removedViews.forEach((v) =>
+              spawnShards(v.tile.type === 'bomb' ? bombHex : v.material.color.getHex(), v.mesh.position),
+            )
+            const bombPositions = removedViews
+              .filter((v) => v.tile.type === 'bomb')
+              .map((v) => v.mesh.position.clone())
             removedViews.forEach((v) => {
               disposeView(v)
               views.delete(v.tile.id)
@@ -514,8 +724,28 @@ export function createGameScene(canvas, level, callbacks = {}) {
             showWordPop(centroid, ev.text)
             shake = 0.24
             playImpact()
-            playShatter(0.06)
             vibrate(30)
+            if (bombPositions.length) {
+              // 拆弹：金色冲击环 + 火花 + 强震
+              bombPositions.forEach((pos) => {
+                shockwave(pos, bombHex)
+                burstAtWorld(pos, {
+                  color: bombHex,
+                  count: 30,
+                  size: 0.22,
+                  speedMin: 0.08,
+                  speedMax: 0.22,
+                  up: 0.13,
+                  gravity: 0.7,
+                  ttl: 0.85,
+                })
+              })
+              shake = Math.max(shake, 0.36)
+              vibrate([20, 30, 40])
+              playDefuse()
+            } else {
+              playShatter(0.06)
+            }
             if (ev.cascade) window.setTimeout(() => playClear(ev.combo), 130)
             mStarts = movedViews.map((m) => m.view.mesh.position.clone())
             phase = 1
@@ -570,7 +800,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
         arr[j * 3] += b.velocities[j].x
         arr[j * 3 + 1] += b.velocities[j].y
         arr[j * 3 + 2] += b.velocities[j].z
-        b.velocities[j].y -= dt * 0.5
+        b.velocities[j].y -= dt * (b.gravity ?? 0.5)
       }
       b.geometry.attributes.position.needsUpdate = true
       b.material.opacity = Math.max(0, 1 - b.life / b.ttl)
@@ -614,6 +844,20 @@ export function createGameScene(canvas, level, callbacks = {}) {
   observer.observe(canvas)
   fitCamera()
   render()
+
+  if (import.meta.env.DEV) {
+    window.__wfDebug = {
+      cols,
+      rows,
+      project: (x, y) => projectToScreen(worldPos(x, y)),
+      corners: () => [
+        projectToScreen(worldPos(0, 0)),
+        projectToScreen(worldPos(cols - 1, 0)),
+        projectToScreen(worldPos(0, rows - 1)),
+        projectToScreen(worldPos(cols - 1, rows - 1)),
+      ],
+    }
+  }
 
   return {
     sync,

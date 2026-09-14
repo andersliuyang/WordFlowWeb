@@ -159,3 +159,109 @@ export function playShatter(delay = 0) {
     tone(freq, { start: delay + index * 0.03, dur: 0.12, type: 'sine', peak: 0.1 })
   })
 }
+
+/** 破冰：玻璃/冰块碎裂质感 */
+export function playCrack() {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime
+
+  // 玻璃碎屑噪声（带通高频）
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const bandpass = ctx.createBiquadFilter()
+  bandpass.type = 'bandpass'
+  bandpass.frequency.value = 3200
+  bandpass.Q.value = 0.9
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.0001, t0)
+  gain.gain.linearRampToValueAtTime(0.42, t0 + 0.004)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3)
+  src.connect(bandpass)
+  bandpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.32)
+
+  // 冰晶脆音（多个非谐波高频）
+  ;[2200, 2960, 3520, 4400].forEach((freq, index) => {
+    tone(freq, { start: 0.005 + index * 0.02, dur: 0.16 + index * 0.03, type: 'sine', peak: 0.12 })
+  })
+
+  // 低频破裂感
+  tone(320, { dur: 0.12, type: 'triangle', peak: 0.16, sweepTo: 170 })
+}
+
+/** 破冰强化版（用于整块碎裂） */
+export function playIceBreak() {
+  playCrack()
+  if (!sfxEnabled) return
+  resumeAudioContext()
+  tone(5200, { start: 0.02, dur: 0.22, type: 'sine', peak: 0.07 })
+  tone(6400, { start: 0.06, dur: 0.24, type: 'sine', peak: 0.05 })
+}
+
+/** 解锁：明亮的上行双音 */
+export function playUnlock() {
+  if (!sfxEnabled) return
+  resumeAudioContext()
+  tone(784, { dur: 0.14, type: 'sine', peak: 0.12 })
+  tone(1174.7, { start: 0.08, dur: 0.22, type: 'sine', peak: 0.12 })
+}
+
+/** 炸弹滴答：低沉短促 */
+export function playTick() {
+  if (!sfxEnabled) return
+  resumeAudioContext()
+  tone(220, { dur: 0.05, type: 'square', peak: 0.07 })
+}
+
+/** 爆炸：低频轰鸣 + 噪声 */
+export function playExplosion() {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime
+  tone(180, { dur: 0.55, type: 'sine', peak: 0.42, sweepTo: 36 })
+
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const lowpass = ctx.createBiquadFilter()
+  lowpass.type = 'lowpass'
+  lowpass.frequency.value = 900
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.44, t0)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.5)
+  src.connect(lowpass)
+  lowpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.55)
+}
+
+/** 拆弹：闷响 + 火花嘶声 + 化解音 */
+export function playDefuse() {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime
+  tone(150, { dur: 0.2, type: 'sine', peak: 0.32, sweepTo: 70 })
+
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const highpass = ctx.createBiquadFilter()
+  highpass.type = 'highpass'
+  highpass.frequency.value = 2000
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.3, t0)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3)
+  src.connect(highpass)
+  highpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.34)
+
+  tone(880, { start: 0.06, dur: 0.18, type: 'sine', peak: 0.12 })
+  tone(1320, { start: 0.12, dur: 0.22, type: 'sine', peak: 0.1 })
+}

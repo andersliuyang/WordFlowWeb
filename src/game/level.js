@@ -82,6 +82,9 @@ export function solveBoard(cols, rows, tiles, wordList, options = {}) {
 
       if (pathHasSturdyIce(next, path)) {
         crackIce(next, path)
+        // 运行时：每次提交都会推进炸弹倒计时（含破冰这一步）
+        const crackExploded = tickBombs(next)
+        if (crackExploded.length > 0) continue
         const result = recurse(
           next,
           remaining,

@@ -46,6 +46,9 @@ const STRINGS = {
     gotIt: '知道了',
     shuffle: '重排',
     deadlock: '没有可拼的词了，点「重排」继续',
+    lockKeyHint: '锁住了：需先消除',
+    lockAdjacent: '锁住了：需先消除相邻的词',
+    confirm: '确定',
   },
   'en-US': {
     start: 'Start Game',
@@ -94,6 +97,9 @@ const STRINGS = {
     gotIt: 'Got it',
     shuffle: 'Shuffle',
     deadlock: 'No words can be formed — tap Shuffle',
+    lockKeyHint: 'Locked — clear',
+    lockAdjacent: 'Locked — clear an adjacent word',
+    confirm: 'Confirm',
   },
 }
 
@@ -105,9 +111,9 @@ const TIPS = {
     gravity: { title: '重力下落', body: '消除后上方方块会下落补位。若掉落新凑成一个原本拼不出的词，会自动级联消除并加分。' },
     combo: { title: '连击', body: '3 秒内连续消除会累积连击，金币与得分更高。' },
     bonus: { title: '彩蛋词', body: '拼出合法但非目标的词会存入彩蛋槽，集满可兑换金币和道具。' },
-    ice: { title: '冰冻方块', body: '冰冻方块需要消除两次才能彻底清掉。' },
-    lock: { title: '锁链方块', body: '锁链方块不能选取，需先清除它指定的词来解锁。' },
-    bomb: { title: '炸弹方块', body: '炸弹每次消除倒计时 -1，归零即失败，优先消掉它！' },
+    ice: { title: '冰冻方块', body: '冰冻方块需要消除两次；第一次碎裂后会恢复成普通方块。' },
+    lock: { title: '锁链方块', body: '锁链方块不能选取；点它可查看需先消除哪个词，解锁后才能拼出它所在的目标词。' },
+    bomb: { title: '炸弹方块', body: '炸弹每次提交（含拼错）倒计时 -1；归零会爆炸，把全场方块炸飞并判负，优先拆掉它！' },
     hint: { title: '提示道具', body: '卡住了？用「提示 / 定向 / 魔棒」，消耗金币或道具帮你脱困。' },
   },
   'en-US': {
@@ -115,9 +121,9 @@ const TIPS = {
     gravity: { title: 'Gravity', body: 'Tiles fall into gaps. If a fall newly forms a word that was not possible before, it clears automatically with a cascade bonus.' },
     combo: { title: 'Combo', body: 'Clearing words within 3 seconds builds a combo, boosting coins and score.' },
     bonus: { title: 'Bonus words', body: 'Valid words outside the targets go to the bonus slot. Fill it for coins and items.' },
-    ice: { title: 'Ice tile', body: 'Ice tiles must be cleared twice to be removed.' },
-    lock: { title: 'Locked tile', body: 'Locked tiles cannot be picked. Clear its key word to unlock it.' },
-    bomb: { title: 'Bomb tile', body: 'The bomb counter drops by 1 each clear. At zero you lose — clear it fast!' },
+    ice: { title: 'Ice tile', body: 'Ice tiles must be cleared twice — the first hit cracks them into a normal tile.' },
+    lock: { title: 'Locked tile', body: 'Locked tiles cannot be picked. Tap one to see which word unlocks it.' },
+    bomb: { title: 'Bomb tile', body: 'The bomb counter drops on every move (even wrong ones). At zero it explodes and blasts the whole board — defuse it fast!' },
     hint: { title: 'Hints', body: 'Stuck? Use Hint / Target / Wand, costing coins or items, to get unstuck.' },
   },
 }
@@ -150,7 +156,7 @@ const GUIDE = {
     {
       visual: 'obstacles',
       title: '障碍方块',
-      body: '冰：需消除两次；锁：先清掉指定词才能解锁；炸弹：每次消除倒计时 -1，归零即失败。',
+      body: '冰：需消除两次（第一次碎裂后恢复成普通方块）；锁：点它可查看需先消除哪个词，解锁后才能拼它所在的词；炸弹：每次提交（含拼错）倒计时 -1，归零爆炸并把全场方块炸飞。',
     },
     {
       visual: 'hint',
@@ -182,7 +188,7 @@ const GUIDE = {
     {
       visual: 'obstacles',
       title: 'Obstacle tiles',
-      body: 'Ice: clear twice. Lock: clear its key word first. Bomb: its counter drops each clear — zero means game over.',
+      body: 'Ice: clear twice (it cracks, then becomes a normal tile). Lock: tap it to see which word unlocks it. Bomb: the counter drops on every move (even wrong ones) — at zero it explodes and blasts the whole board.',
     },
     {
       visual: 'hint',

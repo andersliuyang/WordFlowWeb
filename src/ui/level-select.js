@@ -1,4 +1,4 @@
-import { t } from '../i18n/index.js'
+import { t, getLanguage } from '../i18n/index.js'
 
 function starsMarkup(stars) {
   let out = ''
@@ -13,10 +13,14 @@ export function mountLevelSelect({ levels, save, onPlay, onBack, onSettings, onG
   const el = document.createElement('div')
   el.className = 'screen level-select'
 
-  const groups = [
-    { language: 'zh-CN', label: '中文' },
-    { language: 'en-US', label: 'English' },
-  ]
+  // 中文用户显示中英两组；非中文只显示英文
+  const groups =
+    getLanguage() === 'zh-CN'
+      ? [
+          { language: 'zh-CN', label: '中文' },
+          { language: 'en-US', label: 'English' },
+        ]
+      : [{ language: 'en-US', label: 'English' }]
 
   const sections = groups
     .map((group) => {
@@ -39,7 +43,7 @@ export function mountLevelSelect({ levels, save, onPlay, onBack, onSettings, onG
         .join('')
       return `
         <section class="level-group">
-          <h2 class="level-group__title">${group.label}</h2>
+          ${groups.length > 1 ? `<h2 class="level-group__title">${group.label}</h2>` : ''}
           <div class="level-grid">${cards}</div>
         </section>
       `

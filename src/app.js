@@ -7,15 +7,37 @@ import { mountGuideModal } from './ui/guide-modal.js'
 import { createHomeScene } from './engine/home-scene.js'
 import { createZenBgm } from './audio/zen-bgm.js'
 import { setSfxEnabled, playButton } from './audio/sfx.js'
-import { setLanguage } from './i18n/index.js'
+import { setLanguage, getLanguage } from './i18n/index.js'
 import { saveStore } from './store/save.js'
 import { LEVELS, getLevel } from './data/levels.js'
+
+function faviconSvg(letter) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6ede2"/><stop offset="1" stop-color="#e4d3c4"/></linearGradient><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf5ee"/><stop offset="1" stop-color="#efe3d6"/></linearGradient></defs><polygon points="10,14 17,7 61,7 54,14" fill="url(#t)"/><polygon points="54,14 61,7 61,51 54,58" fill="#d8c6b8"/><rect x="10" y="14" width="44" height="44" rx="10" fill="url(#f)" stroke="#cbb6a8" stroke-width="2.5"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central" font-family="PingFang SC,Microsoft YaHei,Arial,sans-serif" font-size="30" font-weight="700" fill="#5b5349">${letter}</text></svg>`
+}
+
+function applyLanguageChrome() {
+  const zh = getLanguage() === 'zh-CN'
+  document.documentElement.lang = zh ? 'zh-CN' : 'en'
+  document.title = zh ? 'WordFlow 字·谜' : 'WordFlow'
+  const link = document.querySelector('link[rel="icon"]')
+  if (link) {
+    const svg = faviconSvg(zh ? '字' : 'W')
+    link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`
+  }
+}
 
 export function startApp() {
   const root = document.getElementById('app')
   let current = null
+  let currentRefresh = null
 
+  // 首次进入按浏览器语言识别；中文 → 中文，其它 → 英文
+  if (!saveStore.settings.language) {
+    const detected = String(navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh-CN' : 'en-US'
+    saveStore.setSetting('language', detected)
+  }
   setLanguage(saveStore.settings.language)
+  applyLanguageChrome()
   setSfxEnabled(saveStore.settings.sfx)
 
   // 全局按钮点击音效（委托）
@@ -52,13 +74,18 @@ export function startApp() {
   window.addEventListener('keydown', unlockAudio)
   window.addEventListener('touchstart', unlockAudio)
 
-  function mount(screen) {
+  function mount(screen, refresh) {
     if (current) {
       current.dispose?.()
       current.el.remove()
     }
     current = screen
+    currentRefresh = refresh || null
     root.appendChild(screen.el)
+  }
+
+  function refreshCurrent() {
+    currentRefresh?.()
   }
 
   function showHome() {
@@ -68,7 +95,7 @@ export function startApp() {
       onGuide: () => openGuide(),
     })
     const scene = createHomeScene(screen.canvas)
-    mount({ el: screen.el, dispose: () => scene.dispose() })
+    mount({ el: screen.el, dispose: () => scene.dispose() }, () => showHome())
   }
 
   function showLevelSelect() {
@@ -80,7 +107,7 @@ export function startApp() {
       onSettings: () => openSettings(),
       onGuide: () => openGuide(),
     })
-    mount(screen)
+    mount(screen, () => showLevelSelect())
   }
 
   function nextLevelId(currentId) {
@@ -114,7 +141,14 @@ export function startApp() {
     const modal = mountSettingsModal({
       save: saveStore,
       onClose: () => modal.el.remove(),
-      onLanguageChange: (lang) => setLanguage(lang),
+      onLanguageChange: (lang) => {
+        setLanguage(lang)
+        saveStore.setSetting('language', lang)
+        applyLanguageChrome()
+        modal.el.remove()
+        refreshCurrent()
+        openSettings()
+      },
       onBgmChange: () => applyBgm(),
     })
     root.appendChild(modal.el)

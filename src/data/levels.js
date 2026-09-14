@@ -2277,217 +2277,218 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 0,
-        "char": "梅",
+        "char": "云",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 0,
-        "char": "星",
+        "char": "海",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 0,
-        "char": "天",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 0,
-        "char": "星",
-        "type": "normal"
-      },
-      {
-        "x": 4,
         "y": 0,
         "char": "月",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 0,
+        "char": "二",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 0,
+        "char": "虫",
+        "type": "normal"
+      },
+      {
         "x": 5,
         "y": 0,
-        "char": "夜",
+        "char": "日",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 1,
-        "char": "飞",
+        "char": "雪",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 1,
-        "char": "厚",
+        "char": "水",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 1,
-        "char": "海",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 1,
-        "char": "高",
-        "type": "normal"
-      },
-      {
-        "x": 4,
         "y": 1,
         "char": "雨",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 1,
+        "char": "火",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 1,
+        "char": "草",
+        "type": "normal"
+      },
+      {
         "x": 5,
         "y": 1,
-        "char": "花",
+        "char": "三",
         "type": "normal"
       },
       {
         "x": 0,
-        "y": 2,
-        "char": "藏",
-        "type": "normal"
-      },
-      {
-        "x": 1,
         "y": 2,
         "char": "云",
         "type": "normal"
       },
       {
+        "x": 1,
+        "y": 2,
+        "char": "阔",
+        "type": "normal"
+      },
+      {
         "x": 2,
-        "y": 2,
-        "char": "梅",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "森",
-        "type": "normal"
-      },
-      {
-        "x": 4,
         "y": 2,
         "char": "风",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 2,
+        "char": "木",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "char": "河",
+        "type": "ice",
+        "hp": 2
+      },
+      {
         "x": 5,
         "y": 2,
-        "char": "江",
+        "char": "明",
         "type": "normal"
       },
       {
         "x": 0,
-        "y": 3,
-        "char": "意",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 3,
-        "char": "虫",
-        "type": "normal"
-      },
-      {
-        "x": 2,
         "y": 3,
         "char": "林",
         "type": "normal"
       },
       {
-        "x": 3,
+        "x": 1,
         "y": 3,
-        "char": "水",
+        "char": "石",
         "type": "normal"
       },
       {
-        "x": 4,
+        "x": 2,
         "y": 3,
         "char": "春",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 3,
+        "char": "湖",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "江",
+        "type": "normal"
+      },
+      {
         "x": 5,
         "y": 3,
-        "char": "河",
+        "char": "秀",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 4,
-        "char": "山",
+        "char": "森",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 4,
-        "char": "清",
+        "char": "阔",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 4,
-        "char": "舟",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 4,
-        "char": "远",
-        "type": "normal"
-      },
-      {
-        "x": 4,
         "y": 4,
         "char": "夏",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 4,
+        "char": "水",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "char": "花",
+        "type": "normal"
+      },
+      {
         "x": 5,
         "y": 4,
-        "char": "草",
+        "char": "竹",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 5,
-        "char": "水",
+        "char": "霜",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 5,
-        "char": "木",
+        "char": "心",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 5,
-        "char": "海",
+        "char": "秋",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 5,
-        "char": "暖",
+        "char": "桥",
         "type": "normal"
       },
       {
         "x": 4,
         "y": 5,
-        "char": "秋",
+        "char": "田",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 5,
-        "char": "夜",
+        "char": "三",
         "type": "normal"
       }
     ],
@@ -2539,11 +2540,11 @@ export const LEVELS = [
         "text": "春风",
         "path": [
           [
-            4,
+            2,
             3
           ],
           [
-            4,
+            2,
             2
           ]
         ],
@@ -2555,11 +2556,11 @@ export const LEVELS = [
             "text": "夏雨",
             "path": [
               [
-                4,
+                2,
                 4
               ],
               [
-                4,
+                2,
                 3
               ]
             ]
@@ -2569,11 +2570,11 @@ export const LEVELS = [
             "text": "秋月",
             "path": [
               [
-                4,
+                2,
                 5
               ],
               [
-                4,
+                2,
                 4
               ]
             ]
@@ -2587,12 +2588,30 @@ export const LEVELS = [
         "text": "江河",
         "path": [
           [
-            5,
-            2
+            4,
+            3
           ],
           [
-            5,
+            4,
+            2
+          ]
+        ],
+        "cracked": true,
+        "triggers_gravity": false,
+        "combo": 0
+      },
+      {
+        "step": 3,
+        "word_id": "w4",
+        "text": "江河",
+        "path": [
+          [
+            4,
             3
+          ],
+          [
+            4,
+            2
           ]
         ],
         "cracked": false,
@@ -2603,12 +2622,12 @@ export const LEVELS = [
             "text": "花草",
             "path": [
               [
-                5,
-                3
+                4,
+                4
               ],
               [
-                5,
-                4
+                4,
+                3
               ]
             ]
           }
@@ -2636,254 +2655,255 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 0,
-        "char": "绿",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 0,
-        "char": "鸟",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 0,
-        "char": "山",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 0,
-        "char": "雨",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 0,
-        "char": "草",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 0,
-        "char": "香",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 1,
-        "char": "花",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 1,
-        "char": "语",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 1,
-        "char": "轻",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 1,
-        "char": "明",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 1,
-        "char": "雪",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 1,
-        "char": "石",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 2,
-        "char": "好",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 2,
-        "char": "花",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 2,
-        "char": "风",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "高",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 2,
-        "char": "舟",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 2,
-        "char": "松",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 3,
-        "char": "月",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 3,
-        "char": "香",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 3,
-        "char": "淡",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 3,
-        "char": "心",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 3,
-        "char": "雨",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 3,
-        "char": "火",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 4,
-        "char": "圆",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 4,
-        "char": "冬",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 4,
-        "char": "云",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 4,
-        "char": "江",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 4,
-        "char": "光",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 4,
-        "char": "远",
-        "type": "ice",
-        "hp": 2
-      },
-      {
-        "x": 0,
-        "y": 5,
         "char": "水",
         "type": "normal"
       },
       {
         "x": 1,
-        "y": 5,
-        "char": "夏",
+        "y": 0,
+        "char": "柳",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 5,
-        "char": "青",
+        "y": 0,
+        "char": "二",
         "type": "normal"
       },
       {
         "x": 3,
-        "y": 5,
-        "char": "江",
+        "y": 0,
+        "char": "金",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 5,
-        "char": "石",
+        "y": 0,
+        "char": "竹",
         "type": "normal"
       },
       {
         "x": 5,
-        "y": 5,
-        "char": "湖",
+        "y": 0,
+        "char": "青",
         "type": "normal"
       },
       {
         "x": 0,
-        "y": 6,
-        "char": "松",
+        "y": 1,
+        "char": "圆",
         "type": "normal"
       },
       {
         "x": 1,
-        "y": 6,
-        "char": "石",
+        "y": 1,
+        "char": "火",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 6,
-        "char": "明",
+        "y": 1,
+        "char": "暗",
         "type": "normal"
       },
       {
         "x": 3,
-        "y": 6,
+        "y": 1,
+        "char": "松",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 1,
+        "char": "松",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 1,
+        "char": "云",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "char": "月",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "char": "秀",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 2,
+        "char": "光",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 2,
         "char": "花",
         "type": "normal"
       },
       {
         "x": 4,
+        "y": 2,
+        "char": "河",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 2,
+        "char": "淡",
+        "type": "ice",
+        "hp": 2
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "char": "好",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "char": "木",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 3,
+        "char": "夜",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 3,
+        "char": "秋",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "明",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 3,
+        "char": "风",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "char": "花",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "char": "夜",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 4,
+        "char": "舟",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 4,
+        "char": "鱼",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "char": "飞",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 4,
+        "char": "轻",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "char": "绿",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 5,
+        "char": "秋",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 5,
+        "char": "长",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 5,
+        "char": "飞",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 5,
+        "char": "桥",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 5,
+        "char": "山",
+        "type": "bomb",
+        "countdown": 8
+      },
+      {
+        "x": 0,
         "y": 6,
-        "char": "暗",
+        "char": "鸟",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 6,
+        "char": "语",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 6,
+        "char": "花",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 6,
+        "char": "香",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 6,
+        "char": "田",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 6,
-        "char": "柳",
+        "char": "地",
         "type": "normal"
       }
     ],
@@ -2918,8 +2938,8 @@ export const LEVELS = [
       }
     ],
     "bonus_dictionary": [
-      "鸟语花香",
-      "柳暗花明"
+      "柳暗花明",
+      "鸟语花香"
     ],
     "solution_flow": [
       {
@@ -2928,20 +2948,46 @@ export const LEVELS = [
         "text": "云淡风轻",
         "path": [
           [
-            2,
-            4
+            5,
+            1
           ],
           [
-            2,
-            3
-          ],
-          [
-            2,
+            5,
             2
           ],
           [
-            2,
+            5,
+            3
+          ],
+          [
+            5,
+            4
+          ]
+        ],
+        "cracked": true,
+        "triggers_gravity": false,
+        "combo": 0
+      },
+      {
+        "step": 2,
+        "word_id": "w1",
+        "text": "云淡风轻",
+        "path": [
+          [
+            5,
             1
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            5,
+            4
           ]
         ],
         "cracked": false,
@@ -2952,12 +2998,12 @@ export const LEVELS = [
             "text": "青山",
             "path": [
               [
-                2,
-                5
+                5,
+                4
               ],
               [
-                2,
-                4
+                5,
+                5
               ]
             ]
           }
@@ -2965,17 +3011,13 @@ export const LEVELS = [
         "combo": 0
       },
       {
-        "step": 2,
+        "step": 3,
         "word_id": "w3",
         "text": "花好月圆",
         "path": [
           [
             0,
-            1
-          ],
-          [
-            0,
-            2
+            4
           ],
           [
             0,
@@ -2983,7 +3025,11 @@ export const LEVELS = [
           ],
           [
             0,
-            4
+            2
+          ],
+          [
+            0,
+            1
           ]
         ],
         "cracked": false,
@@ -2995,11 +3041,11 @@ export const LEVELS = [
             "path": [
               [
                 0,
-                4
+                5
               ],
               [
                 0,
-                5
+                4
               ]
             ]
           }
@@ -3027,38 +3073,37 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 0,
-        "char": "虫",
+        "char": "光",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 0,
-        "char": "地",
+        "char": "日",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 0,
-        "char": "语",
-        "type": "ice",
-        "hp": 2
+        "char": "秋",
+        "type": "normal"
       },
       {
         "x": 3,
         "y": 0,
-        "char": "海",
+        "char": "雨",
         "type": "normal"
       },
       {
         "x": 4,
         "y": 0,
-        "char": "夏",
+        "char": "湖",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 0,
-        "char": "秋",
+        "char": "梅",
         "type": "normal"
       },
       {
@@ -3070,226 +3115,227 @@ export const LEVELS = [
       {
         "x": 1,
         "y": 1,
-        "char": "河",
+        "char": "星",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 1,
-        "char": "思",
+        "char": "天",
         "type": "normal"
       },
       {
         "x": 3,
+        "y": 1,
+        "char": "云",
+        "type": "normal"
+      },
+      {
+        "x": 4,
         "y": 1,
         "char": "阔",
         "type": "normal"
       },
       {
-        "x": 4,
-        "y": 1,
-        "char": "白",
-        "type": "normal"
-      },
-      {
         "x": 5,
         "y": 1,
-        "char": "天",
+        "char": "木",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 2,
-        "char": "长",
+        "char": "意",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 2,
-        "char": "鸟",
+        "char": "一",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 2,
-        "char": "虫",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "天",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 2,
-        "char": "山",
-        "type": "normal"
-      },
-      {
-        "x": 5,
         "y": 2,
         "char": "高",
         "type": "normal"
       },
       {
-        "x": 0,
-        "y": 3,
-        "char": "心",
-        "type": "bomb",
-        "countdown": 9
-      },
-      {
-        "x": 1,
-        "y": 3,
-        "char": "明",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 3,
-        "char": "湖",
-        "type": "normal"
-      },
-      {
         "x": 3,
-        "y": 3,
-        "char": "空",
+        "y": 2,
+        "char": "秀",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 3,
-        "char": "清",
+        "y": 2,
+        "char": "人",
         "type": "normal"
       },
       {
         "x": 5,
+        "y": 2,
+        "char": "夜",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "char": "光",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "char": "二",
+        "type": "normal"
+      },
+      {
+        "x": 2,
         "y": 3,
         "char": "云",
         "type": "normal"
       },
       {
-        "x": 0,
-        "y": 4,
-        "char": "实",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 4,
-        "char": "秋",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 4,
-        "char": "华",
-        "type": "normal"
-      },
-      {
         "x": 3,
+        "y": 3,
+        "char": "水",
+        "type": "bomb",
+        "countdown": 9
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "长",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 3,
+        "char": "心",
+        "type": "normal"
+      },
+      {
+        "x": 0,
         "y": 4,
         "char": "春",
         "type": "normal"
       },
       {
-        "x": 4,
+        "x": 1,
         "y": 4,
-        "char": "水",
+        "char": "空",
         "type": "normal"
       },
       {
-        "x": 5,
+        "x": 2,
         "y": 4,
         "char": "淡",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 4,
+        "char": "清",
+        "type": "ice",
+        "hp": 2
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "char": "心",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 4,
+        "char": "虫",
+        "type": "normal"
+      },
+      {
         "x": 0,
         "y": 5,
-        "char": "虫",
+        "char": "华",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 5,
-        "char": "霜",
+        "char": "天",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 5,
-        "char": "虫",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 5,
-        "char": "春",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 5,
-        "char": "秀",
-        "type": "normal"
-      },
-      {
-        "x": 5,
         "y": 5,
         "char": "月",
         "type": "normal"
       },
       {
+        "x": 3,
+        "y": 5,
+        "char": "山",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 5,
+        "char": "冬",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 5,
+        "char": "田",
+        "type": "normal"
+      },
+      {
         "x": 0,
         "y": 6,
-        "char": "春",
-        "type": "lock",
-        "lockKey": null,
-        "locked": true
+        "char": "秋",
+        "type": "normal"
       },
       {
         "x": 1,
         "y": 6,
-        "char": "兰",
+        "char": "阔",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 6,
-        "char": "光",
+        "char": "风",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 6,
-        "char": "湖",
-        "type": "normal"
+        "char": "白",
+        "type": "lock",
+        "lockKey": "w5",
+        "locked": true
       },
       {
         "x": 4,
         "y": 6,
-        "char": "云",
+        "char": "河",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 6,
-        "char": "三",
+        "char": "心",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 7,
-        "char": "草",
+        "char": "实",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 7,
-        "char": "湖",
+        "char": "海",
         "type": "normal"
       },
       {
@@ -3301,19 +3347,19 @@ export const LEVELS = [
       {
         "x": 3,
         "y": 7,
-        "char": "夜",
+        "char": "夏",
         "type": "normal"
       },
       {
         "x": 4,
         "y": 7,
-        "char": "雨",
+        "char": "藏",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 7,
-        "char": "日",
+        "char": "海",
         "type": "normal"
       }
     ],
@@ -3365,75 +3411,72 @@ export const LEVELS = [
         "text": "山清水秀",
         "path": [
           [
-            4,
-            2
+            3,
+            5
           ],
           [
-            4,
-            3
-          ],
-          [
-            4,
+            3,
             4
           ],
           [
-            4,
-            5
+            3,
+            3
+          ],
+          [
+            3,
+            2
           ]
         ],
-        "cracked": false,
+        "cracked": true,
         "triggers_gravity": false,
-        "cascades": [
-          {
-            "word_id": "w2",
-            "text": "白云",
-            "path": [
-              [
-                4,
-                5
-              ],
-              [
-                4,
-                6
-              ]
-            ]
-          },
-          {
-            "word_id": "w3",
-            "text": "夏雨",
-            "path": [
-              [
-                4,
-                6
-              ],
-              [
-                4,
-                7
-              ]
-            ]
-          }
-        ],
         "combo": 0
       },
       {
         "step": 2,
+        "word_id": "w1",
+        "text": "山清水秀",
+        "path": [
+          [
+            3,
+            5
+          ],
+          [
+            3,
+            4
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            3,
+            2
+          ]
+        ],
+        "cracked": false,
+        "triggers_gravity": true,
+        "cascades": [],
+        "combo": 0
+      },
+      {
+        "step": 3,
         "word_id": "w4",
         "text": "天高云淡",
         "path": [
           [
-            5,
+            2,
             1
           ],
           [
-            5,
+            2,
             2
           ],
           [
-            5,
+            2,
             3
           ],
           [
-            5,
+            2,
             4
           ]
         ],
@@ -3445,12 +3488,46 @@ export const LEVELS = [
             "text": "秋月",
             "path": [
               [
-                5,
+                2,
                 4
               ],
               [
-                5,
+                2,
                 5
+              ]
+            ]
+          }
+        ],
+        "combo": 0
+      },
+      {
+        "step": 4,
+        "word_id": "w2",
+        "text": "白云",
+        "path": [
+          [
+            3,
+            6
+          ],
+          [
+            3,
+            5
+          ]
+        ],
+        "cracked": false,
+        "triggers_gravity": false,
+        "cascades": [
+          {
+            "word_id": "w3",
+            "text": "夏雨",
+            "path": [
+              [
+                3,
+                7
+              ],
+              [
+                3,
+                6
               ]
             ]
           }
@@ -5898,19 +5975,20 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 0,
-        "char": "J",
+        "char": "E",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 0,
-        "char": "E",
-        "type": "normal"
+        "char": "A",
+        "type": "ice",
+        "hp": 2
       },
       {
         "x": 2,
         "y": 0,
-        "char": "Y",
+        "char": "G",
         "type": "normal"
       },
       {
@@ -5922,7 +6000,7 @@ export const LEVELS = [
       {
         "x": 4,
         "y": 0,
-        "char": "L",
+        "char": "O",
         "type": "normal"
       },
       {
@@ -5934,25 +6012,25 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 1,
-        "char": "G",
+        "char": "C",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 1,
-        "char": "C",
+        "char": "R",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 1,
-        "char": "C",
+        "char": "V",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 1,
-        "char": "K",
+        "char": "D",
         "type": "normal"
       },
       {
@@ -5964,145 +6042,145 @@ export const LEVELS = [
       {
         "x": 5,
         "y": 1,
-        "char": "A",
+        "char": "C",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 2,
-        "char": "O",
+        "char": "A",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 2,
-        "char": "A",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 2,
-        "char": "A",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "A",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 2,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 2,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 3,
-        "char": "D",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 3,
-        "char": "E",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 3,
-        "char": "T",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 3,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 3,
-        "char": "O",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 3,
         "char": "M",
         "type": "normal"
       },
       {
-        "x": 0,
-        "y": 4,
-        "char": "N",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 4,
-        "char": "S",
-        "type": "normal"
-      },
-      {
         "x": 2,
-        "y": 4,
-        "char": "N",
+        "y": 2,
+        "char": "O",
         "type": "normal"
       },
       {
         "x": 3,
-        "y": 4,
-        "char": "T",
+        "y": 2,
+        "char": "D",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 4,
+        "y": 2,
         "char": "F",
         "type": "normal"
       },
       {
         "x": 5,
+        "y": 2,
+        "char": "A",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "char": "E",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "char": "G",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 3,
+        "char": "Q",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 3,
+        "char": "K",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "O",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 3,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 0,
         "y": 4,
-        "char": "J",
+        "char": "S",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 4,
+        "char": "R",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 4,
+        "char": "A",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "char": "X",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 4,
+        "char": "H",
         "type": "normal"
       },
       {
         "x": 0,
         "y": 5,
-        "char": "G",
+        "char": "I",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 5,
-        "char": "I",
+        "char": "N",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 5,
-        "char": "V",
+        "char": "J",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 5,
-        "char": "Z",
+        "char": "H",
         "type": "normal"
       },
       {
         "x": 4,
         "y": 5,
-        "char": "O",
+        "char": "L",
         "type": "normal"
       },
       {
@@ -6167,15 +6245,15 @@ export const LEVELS = [
         "text": "SEA",
         "path": [
           [
-            1,
+            0,
             4
           ],
           [
-            1,
+            0,
             3
           ],
           [
-            1,
+            0,
             2
           ]
         ],
@@ -6187,15 +6265,15 @@ export const LEVELS = [
             "text": "ICE",
             "path": [
               [
-                1,
+                0,
                 5
               ],
               [
-                1,
+                0,
                 4
               ],
               [
-                1,
+                0,
                 3
               ]
             ]
@@ -6210,7 +6288,7 @@ export const LEVELS = [
         "path": [
           [
             4,
-            4
+            2
           ],
           [
             4,
@@ -6218,7 +6296,7 @@ export const LEVELS = [
           ],
           [
             4,
-            2
+            4
           ]
         ],
         "cracked": false,
@@ -6230,7 +6308,7 @@ export const LEVELS = [
             "path": [
               [
                 4,
-                5
+                3
               ],
               [
                 4,
@@ -6238,7 +6316,7 @@ export const LEVELS = [
               ],
               [
                 4,
-                3
+                5
               ]
             ]
           }
@@ -6251,39 +6329,61 @@ export const LEVELS = [
         "text": "ARM",
         "path": [
           [
-            5,
+            1,
+            0
+          ],
+          [
+            1,
             1
           ],
           [
-            5,
+            1,
             2
-          ],
-          [
-            5,
-            3
           ]
         ],
-        "cracked": false,
-        "triggers_gravity": true,
-        "cascades": [],
+        "cracked": true,
+        "triggers_gravity": false,
         "combo": 0
       },
       {
         "step": 4,
+        "word_id": "w5",
+        "text": "ARM",
+        "path": [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            2
+          ]
+        ],
+        "cracked": false,
+        "triggers_gravity": false,
+        "cascades": [],
+        "combo": 0
+      },
+      {
+        "step": 5,
         "word_id": "w6",
         "text": "ART",
         "path": [
           [
-            2,
-            2
-          ],
-          [
             3,
-            3
+            4
           ],
           [
             2,
-            3
+            4
+          ],
+          [
+            1,
+            4
           ]
         ],
         "cracked": false,
@@ -6349,8 +6449,7 @@ export const LEVELS = [
         "x": 0,
         "y": 1,
         "char": "L",
-        "type": "ice",
-        "hp": 2
+        "type": "normal"
       },
       {
         "x": 1,
@@ -6422,7 +6521,8 @@ export const LEVELS = [
         "x": 0,
         "y": 3,
         "char": "A",
-        "type": "normal"
+        "type": "ice",
+        "hp": 2
       },
       {
         "x": 1,
@@ -6737,292 +6837,292 @@ export const LEVELS = [
       {
         "x": 0,
         "y": 0,
-        "char": "K",
+        "char": "I",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 0,
-        "char": "X",
+        "char": "Q",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 0,
-        "char": "R",
+        "char": "K",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 0,
-        "char": "Q",
+        "char": "S",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 0,
-        "char": "G",
-        "type": "normal"
-      },
-      {
-        "x": 5,
         "y": 0,
         "char": "F",
         "type": "normal"
       },
       {
-        "x": 0,
-        "y": 1,
-        "char": "D",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 1,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 1,
-        "char": "N",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 1,
-        "char": "V",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 1,
-        "char": "W",
-        "type": "normal"
-      },
-      {
         "x": 5,
-        "y": 1,
-        "char": "E",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 2,
-        "char": "N",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 2,
-        "char": "Z",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 2,
-        "char": "O",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "D",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 2,
-        "char": "U",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 2,
-        "char": "E",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 3,
-        "char": "A",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 3,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 3,
-        "char": "O",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 3,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 3,
-        "char": "Z",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 3,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 4,
-        "char": "S",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 4,
-        "char": "K",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 4,
-        "char": "M",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 4,
-        "char": "K",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 4,
-        "char": "U",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 4,
-        "char": "T",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 5,
+        "y": 0,
         "char": "Y",
         "type": "normal"
       },
       {
+        "x": 0,
+        "y": 1,
+        "char": "U",
+        "type": "normal"
+      },
+      {
         "x": 1,
-        "y": 5,
-        "char": "J",
-        "type": "lock",
-        "lockKey": null,
-        "locked": true
+        "y": 1,
+        "char": "C",
+        "type": "normal"
       },
       {
         "x": 2,
-        "y": 5,
+        "y": 1,
+        "char": "S",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 1,
+        "char": "M",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 1,
+        "char": "A",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 1,
+        "char": "Y",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 2,
+        "char": "K",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 2,
+        "char": "B",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 2,
         "char": "A",
         "type": "normal"
       },
       {
         "x": 3,
+        "y": 2,
+        "char": "O",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "char": "E",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 2,
+        "char": "V",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "char": "X",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "char": "C",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 3,
+        "char": "N",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 3,
+        "char": "O",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "E",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 3,
+        "char": "Y",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 4,
+        "char": "K",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "char": "G",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 4,
+        "char": "D",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 4,
+        "char": "N",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 4,
+        "char": "R",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 4,
+        "char": "K",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 5,
+        "char": "B",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 5,
+        "char": "Q",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 5,
+        "char": "W",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 5,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 5,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 5,
         "y": 5,
         "char": "C",
         "type": "normal"
       },
       {
-        "x": 4,
-        "y": 5,
-        "char": "I",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 5,
-        "char": "A",
-        "type": "normal"
-      },
-      {
         "x": 0,
         "y": 6,
-        "char": "Z",
+        "char": "P",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 6,
-        "char": "H",
+        "char": "I",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 6,
-        "char": "T",
+        "char": "W",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 6,
-        "char": "O",
+        "char": "A",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 6,
-        "char": "Q",
-        "type": "normal"
-      },
-      {
-        "x": 5,
         "y": 6,
         "char": "E",
         "type": "ice",
         "hp": 2
       },
       {
+        "x": 5,
+        "y": 6,
+        "char": "O",
+        "type": "normal"
+      },
+      {
         "x": 0,
         "y": 7,
-        "char": "D",
+        "char": "G",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 7,
-        "char": "J",
+        "char": "U",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 7,
-        "char": "S",
+        "char": "Q",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 7,
         "char": "R",
-        "type": "normal"
+        "type": "lock",
+        "lockKey": "w3",
+        "locked": true
       },
       {
         "x": 4,
         "y": 7,
-        "char": "B",
+        "char": "L",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 7,
-        "char": "L",
+        "char": "R",
         "type": "normal"
       }
     ],
@@ -7057,8 +7157,8 @@ export const LEVELS = [
       }
     ],
     "bonus_dictionary": [
-      "SAND",
-      "ROCK"
+      "ROCK",
+      "SAND"
     ],
     "solution_flow": [
       {
@@ -7067,20 +7167,47 @@ export const LEVELS = [
         "text": "MOON",
         "path": [
           [
-            2,
-            4
+            3,
+            1
           ],
           [
-            2,
+            3,
+            2
+          ],
+          [
+            3,
             3
           ],
           [
             2,
-            2
+            3
+          ]
+        ],
+        "cracked": false,
+        "triggers_gravity": true,
+        "cascades": [],
+        "combo": 0
+      },
+      {
+        "step": 2,
+        "word_id": "w3",
+        "text": "TREE",
+        "path": [
+          [
+            3,
+            5
           ],
           [
-            2,
-            1
+            4,
+            4
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            4,
+            2
           ]
         ],
         "cracked": false,
@@ -7091,69 +7218,41 @@ export const LEVELS = [
             "text": "STAR",
             "path": [
               [
-                2,
-                7
+                3,
+                4
               ],
               [
-                2,
-                6
-              ],
-              [
-                2,
+                4,
                 5
               ],
               [
-                2,
-                4
+                3,
+                6
+              ],
+              [
+                3,
+                7
               ]
             ]
-          }
-        ],
-        "combo": 0
-      },
-      {
-        "step": 2,
-        "word_id": "w3",
-        "text": "TREE",
-        "path": [
-          [
-            5,
-            4
-          ],
-          [
-            5,
-            3
-          ],
-          [
-            5,
-            2
-          ],
-          [
-            5,
-            1
-          ]
-        ],
-        "cracked": false,
-        "triggers_gravity": false,
-        "cascades": [
+          },
           {
             "word_id": "w4",
             "text": "LEAF",
             "path": [
               [
-                5,
+                4,
                 7
               ],
               [
-                5,
+                4,
                 6
               ],
               [
-                5,
+                4,
                 5
               ],
               [
-                5,
+                4,
                 4
               ]
             ]
@@ -7188,166 +7287,164 @@ export const LEVELS = [
       {
         "x": 1,
         "y": 0,
-        "char": "C",
+        "char": "M",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 0,
-        "char": "D",
+        "char": "W",
         "type": "normal"
       },
       {
         "x": 3,
-        "y": 0,
-        "char": "B",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 0,
-        "char": "V",
-        "type": "normal"
-      },
-      {
-        "x": 5,
         "y": 0,
         "char": "M",
         "type": "normal"
       },
       {
-        "x": 0,
-        "y": 1,
-        "char": "N",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 1,
-        "char": "U",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 1,
-        "char": "E",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 1,
-        "char": "H",
-        "type": "normal"
-      },
-      {
         "x": 4,
-        "y": 1,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 1,
-        "char": "U",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 2,
-        "char": "O",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 2,
-        "char": "Z",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 2,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 2,
-        "char": "Y",
-        "type": "bomb",
-        "countdown": 10
-      },
-      {
-        "x": 4,
-        "y": 2,
-        "char": "A",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 2,
-        "char": "B",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 3,
-        "char": "R",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 3,
+        "y": 0,
         "char": "G",
         "type": "normal"
       },
       {
+        "x": 5,
+        "y": 0,
+        "char": "Z",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 1,
+        "char": "R",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 1,
+        "char": "X",
+        "type": "normal"
+      },
+      {
         "x": 2,
-        "y": 3,
+        "y": 1,
         "char": "I",
         "type": "normal"
       },
       {
         "x": 3,
-        "y": 3,
-        "char": "M",
+        "y": 1,
+        "char": "O",
         "type": "normal"
       },
       {
         "x": 4,
-        "y": 3,
-        "char": "T",
+        "y": 1,
+        "char": "G",
         "type": "normal"
       },
       {
         "x": 5,
-        "y": 3,
-        "char": "V",
-        "type": "lock",
-        "lockKey": null,
-        "locked": true
-      },
-      {
-        "x": 0,
-        "y": 4,
-        "char": "A",
+        "y": 1,
+        "char": "P",
         "type": "normal"
       },
       {
+        "x": 0,
+        "y": 2,
+        "char": "A",
+        "type": "ice",
+        "hp": 2
+      },
+      {
         "x": 1,
-        "y": 4,
-        "char": "T",
+        "y": 2,
+        "char": "V",
         "type": "normal"
       },
       {
         "x": 2,
-        "y": 4,
+        "y": 2,
+        "char": "N",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 2,
+        "char": "O",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 2,
+        "char": "C",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 2,
+        "char": "X",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 3,
+        "char": "I",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 3,
+        "char": "X",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 3,
         "char": "F",
         "type": "normal"
       },
       {
         "x": 3,
+        "y": 3,
+        "char": "N",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 3,
+        "char": "G",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 3,
+        "char": "L",
+        "type": "normal"
+      },
+      {
+        "x": 0,
         "y": 4,
-        "char": "O",
+        "char": "N",
+        "type": "normal"
+      },
+      {
+        "x": 1,
+        "y": 4,
+        "char": "M",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 4,
+        "char": "I",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 4,
+        "char": "H",
         "type": "normal"
       },
       {
@@ -7359,73 +7456,74 @@ export const LEVELS = [
       {
         "x": 5,
         "y": 4,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 0,
-        "y": 5,
-        "char": "I",
-        "type": "normal"
-      },
-      {
-        "x": 1,
-        "y": 5,
-        "char": "B",
-        "type": "normal"
-      },
-      {
-        "x": 2,
-        "y": 5,
-        "char": "N",
-        "type": "normal"
-      },
-      {
-        "x": 3,
-        "y": 5,
-        "char": "O",
-        "type": "normal"
-      },
-      {
-        "x": 4,
-        "y": 5,
-        "char": "X",
-        "type": "normal"
-      },
-      {
-        "x": 5,
-        "y": 5,
         "char": "V",
         "type": "normal"
       },
       {
         "x": 0,
-        "y": 6,
+        "y": 5,
         "char": "N",
+        "type": "bomb",
+        "countdown": 10
+      },
+      {
+        "x": 1,
+        "y": 5,
+        "char": "X",
+        "type": "normal"
+      },
+      {
+        "x": 2,
+        "y": 5,
+        "char": "R",
+        "type": "normal"
+      },
+      {
+        "x": 3,
+        "y": 5,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 4,
+        "y": 5,
+        "char": "T",
+        "type": "normal"
+      },
+      {
+        "x": 5,
+        "y": 5,
+        "char": "K",
+        "type": "normal"
+      },
+      {
+        "x": 0,
+        "y": 6,
+        "char": "O",
         "type": "normal"
       },
       {
         "x": 1,
         "y": 6,
-        "char": "C",
+        "char": "X",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 6,
-        "char": "I",
+        "char": "E",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 6,
-        "char": "N",
+        "char": "G",
         "type": "normal"
       },
       {
         "x": 4,
         "y": 6,
-        "char": "G",
+        "char": "A",
         "type": "normal"
       },
       {
@@ -7438,37 +7536,38 @@ export const LEVELS = [
         "x": 0,
         "y": 7,
         "char": "W",
-        "type": "normal"
+        "type": "lock",
+        "lockKey": "w3",
+        "locked": true
       },
       {
         "x": 1,
         "y": 7,
-        "char": "T",
+        "char": "P",
         "type": "normal"
       },
       {
         "x": 2,
         "y": 7,
-        "char": "W",
+        "char": "D",
         "type": "normal"
       },
       {
         "x": 3,
         "y": 7,
-        "char": "U",
-        "type": "ice",
-        "hp": 2
+        "char": "T",
+        "type": "normal"
       },
       {
         "x": 4,
         "y": 7,
-        "char": "C",
+        "char": "R",
         "type": "normal"
       },
       {
         "x": 5,
         "y": 7,
-        "char": "Q",
+        "char": "K",
         "type": "normal"
       }
     ],
@@ -7514,19 +7613,19 @@ export const LEVELS = [
         "path": [
           [
             2,
-            4
-          ],
-          [
-            2,
             3
           ],
           [
             2,
-            2
+            4
           ],
           [
             2,
-            1
+            5
+          ],
+          [
+            2,
+            6
           ]
         ],
         "cracked": false,
@@ -7538,11 +7637,7 @@ export const LEVELS = [
             "path": [
               [
                 2,
-                7
-              ],
-              [
-                2,
-                6
+                4
               ],
               [
                 2,
@@ -7550,7 +7645,11 @@ export const LEVELS = [
               ],
               [
                 2,
-                4
+                6
+              ],
+              [
+                2,
+                7
               ]
             ]
           }
@@ -7564,19 +7663,45 @@ export const LEVELS = [
         "path": [
           [
             0,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            0,
             3
           ],
           [
             0,
             4
+          ]
+        ],
+        "cracked": true,
+        "triggers_gravity": false,
+        "combo": 0
+      },
+      {
+        "step": 3,
+        "word_id": "w3",
+        "text": "RAIN",
+        "path": [
+          [
+            0,
+            1
           ],
           [
             0,
-            5
+            2
           ],
           [
             0,
-            6
+            3
+          ],
+          [
+            0,
+            4
           ]
         ],
         "cracked": false,
