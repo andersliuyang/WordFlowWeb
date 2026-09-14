@@ -60,13 +60,8 @@ export function createHomeScene(canvas) {
   const cubeGeometry = new RoundedBoxGeometry(1.6, 1.6, 1.6, 4, 0.26)
   disposables.push(cubeGeometry)
 
-  const cols = 4
-  const rows = 3
-  const cubeCount = cols * rows
-  const spanX = 17
-  const spanY = 10
-  const cellX = spanX / (cols - 1)
-  const cellY = spanY / (rows - 1)
+  const cubeCount = 14
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5))
 
   for (let i = 0; i < cubeCount; i += 1) {
     const glyph = GLYPHS[i % GLYPHS.length]
@@ -77,17 +72,23 @@ export function createHomeScene(canvas) {
     })
     const mesh = new THREE.Mesh(cubeGeometry, material)
 
-    const col = i % cols
-    const row = Math.floor(i / cols)
-    const baseX = (col / (cols - 1) - 0.5) * spanX
-    const baseY = (row / (rows - 1) - 0.5) * spanY
-    const stagger = row % 2 === 1 ? cellX * 0.5 : 0
+    const angle = i * goldenAngle + (random() - 0.5) * 0.4
+    const spread = (i + 0.5) / cubeCount
+    const distance = 3.2 + Math.sqrt(spread) * 6.8 + (random() - 0.5) * 1.1
+
     mesh.position.set(
-      baseX + stagger + (random() - 0.5) * cellX * 0.18,
-      baseY + (random() - 0.5) * cellY * 0.22,
-      -1.5 - random() * 5,
+      Math.cos(angle) * distance,
+      Math.sin(angle) * distance * 0.72,
+      -1.5 - random() * 6.5,
     )
-    mesh.rotation.set((random() - 0.5) * 0.6, random() * Math.PI, (random() - 0.5) * 0.4)
+
+    // 沿径向向外翻滚的姿态，制造爆散感
+    mesh.rotation.set(
+      (random() - 0.5) * 1.1,
+      random() * Math.PI,
+      angle * 0.45 + (random() - 0.5) * 0.6,
+    )
+    mesh.scale.setScalar(0.82 + random() * 0.42)
     makeFloater(mesh, random)
 
     group.add(mesh)
