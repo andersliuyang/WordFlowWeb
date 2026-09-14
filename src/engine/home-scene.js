@@ -59,7 +59,15 @@ export function createHomeScene(canvas) {
 
   const cubeGeometry = new RoundedBoxGeometry(1.6, 1.6, 1.6, 4, 0.26)
   disposables.push(cubeGeometry)
-  const cubeCount = 12
+
+  const cols = 4
+  const rows = 3
+  const cubeCount = cols * rows
+  const spanX = 17
+  const spanY = 10
+  const cellX = spanX / (cols - 1)
+  const cellY = spanY / (rows - 1)
+
   for (let i = 0; i < cubeCount; i += 1) {
     const glyph = GLYPHS[i % GLYPHS.length]
     const material = new THREE.MeshStandardMaterial({
@@ -69,12 +77,15 @@ export function createHomeScene(canvas) {
     })
     const mesh = new THREE.Mesh(cubeGeometry, material)
 
-    const angle = (i / cubeCount) * Math.PI * 2 + random() * 0.5
-    const radius = 9 * (0.45 + random() * 0.55)
+    const col = i % cols
+    const row = Math.floor(i / cols)
+    const baseX = (col / (cols - 1) - 0.5) * spanX
+    const baseY = (row / (rows - 1) - 0.5) * spanY
+    const stagger = row % 2 === 1 ? cellX * 0.5 : 0
     mesh.position.set(
-      Math.cos(angle) * radius,
-      (random() - 0.5) * 9,
-      -1 - random() * 8,
+      baseX + stagger + (random() - 0.5) * cellX * 0.18,
+      baseY + (random() - 0.5) * cellY * 0.22,
+      -1.5 - random() * 5,
     )
     mesh.rotation.set((random() - 0.5) * 0.6, random() * Math.PI, (random() - 0.5) * 0.4)
     makeFloater(mesh, random)
