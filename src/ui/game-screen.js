@@ -2,7 +2,7 @@ import { GameSession } from '../game/session.js'
 import { createGameScene } from '../engine/game-scene.js'
 import { saveStore, HINT_COST, SHUFFLE_COST } from '../store/save.js'
 import { t, getTip } from '../i18n/index.js'
-import { playClick, playClear, playBonus, playFail, playWin, playLose } from '../audio/sfx.js'
+import { playBonus, playFail, playWin, playLose } from '../audio/sfx.js'
 import { showToast } from './toast.js'
 import { mountCoach } from './coach.js'
 
@@ -174,38 +174,36 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
       return
     }
 
-    let sawClear = false
-    for (const event of res.events || []) {
-      if (event.kind === 'crack') {
-        playClick()
-        scene.burst(event.path)
-      } else if (event.kind === 'clear') {
-        sawClear = true
-        playClear(event.combo)
-        scene.burst(event.path)
-      } else if (event.kind === 'bonus') {
+    const events = res.events || []
+    const boardChanged = events.some((e) => e.kind === 'clear' || e.kind === 'crack')
+
+    for (const event of events) {
+      if (event.kind === 'bonus') {
         playBonus()
         showToast(t('bonusGot'))
       } else if (event.kind === 'bonusReward') {
         showToast(`+${event.coins}`)
       }
     }
-    if (!sawClear && (res.events || []).some((e) => e.kind === 'crack')) {
-      showToast('冰冻: 再消除一次')
+
+    if (!boardChanged) {
+      scene.sync(session.board)
+      updateHud()
+      return
     }
 
-    if (sawClear) enqueueTip('gravity')
-    if (res.combo >= 1) enqueueTip('combo')
-
-    scene.sync(session.board)
-    updateHud()
-
-    if (session.status === 'playing' && session.isDeadlocked()) {
-      showToast(t('deadlock'))
-    }
-
-    if (session.status === 'won') finishWin()
-    else if (session.status === 'lost') finishLose()
+    scene.playResolution(events, session.board, {
+      onDone() {
+        const sawClear = events.some((e) => e.kind === 'clear')
+        if (!sawClear && events.some((e) => e.kind === 'crack')) showToast('冰冻: 再消除一次')
+        if (sawClear) enqueueTip('gravity')
+        if (res.combo >= 1) enqueueTip('combo')
+        updateHud()
+        if (session.status === 'playing' && session.isDeadlocked()) showToast(t('deadlock'))
+        if (session.status === 'won') finishWin()
+        else if (session.status === 'lost') finishLose()
+      },
+    })
   }
 
   function resolveTargeted(cell) {

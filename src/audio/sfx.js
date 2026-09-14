@@ -80,3 +80,82 @@ export function playLose() {
     tone(freq, { start: index * 0.16, dur: 0.5, type: 'triangle', peak: 0.14 })
   })
 }
+
+// ---------- 新增：滑动 / 碰撞 / 破碎 ----------
+
+let noiseBuffer = null
+
+function getNoise(ctx) {
+  if (noiseBuffer) return noiseBuffer
+  const length = Math.floor(ctx.sampleRate * 0.4)
+  noiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate)
+  const data = noiseBuffer.getChannelData(0)
+  for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1
+  return noiseBuffer
+}
+
+/** 滑动连线：更轻更高的短促音 */
+export function playSlide() {
+  if (!sfxEnabled) return
+  resumeAudioContext()
+  tone(1000, { dur: 0.04, type: 'sine', peak: 0.07 })
+}
+
+/** UI 按钮点击：柔和清脆 */
+export function playButton() {
+  if (!sfxEnabled) return
+  resumeAudioContext()
+  tone(520, { dur: 0.07, type: 'triangle', peak: 0.11 })
+  tone(1040, { start: 0.008, dur: 0.05, type: 'sine', peak: 0.05 })
+}
+
+/** 碰撞：低频闷响 + 中频爆点（手机外放也能听到） */
+export function playImpact() {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime
+  tone(150, { dur: 0.22, type: 'sine', peak: 0.34, sweepTo: 48 })
+
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const bandpass = ctx.createBiquadFilter()
+  bandpass.type = 'bandpass'
+  bandpass.frequency.value = 1500
+  bandpass.Q.value = 0.7
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.5, t0)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.13)
+  src.connect(bandpass)
+  bandpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.15)
+}
+
+/** 破碎：明亮噪声碎响 + 玻璃脆音 */
+export function playShatter(delay = 0) {
+  if (!sfxEnabled) return
+  const ctx = resumeAudioContext()
+  if (!ctx) return
+  const t0 = ctx.currentTime + delay
+
+  const src = ctx.createBufferSource()
+  src.buffer = getNoise(ctx)
+  const highpass = ctx.createBiquadFilter()
+  highpass.type = 'highpass'
+  highpass.frequency.value = 1600
+  const gain = ctx.createGain()
+  gain.gain.setValueAtTime(0.0001, t0)
+  gain.gain.linearRampToValueAtTime(0.42, t0 + 0.005)
+  gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.35)
+  src.connect(highpass)
+  highpass.connect(gain)
+  gain.connect(ctx.destination)
+  src.start(t0)
+  src.stop(t0 + 0.4)
+
+  ;[1568, 2093, 2637].forEach((freq, index) => {
+    tone(freq, { start: delay + index * 0.03, dur: 0.12, type: 'sine', peak: 0.1 })
+  })
+}

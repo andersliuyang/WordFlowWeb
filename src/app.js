@@ -6,7 +6,7 @@ import { mountSettingsModal } from './ui/settings-modal.js'
 import { mountGuideModal } from './ui/guide-modal.js'
 import { createHomeScene } from './engine/home-scene.js'
 import { createZenBgm } from './audio/zen-bgm.js'
-import { setSfxEnabled } from './audio/sfx.js'
+import { setSfxEnabled, playButton } from './audio/sfx.js'
 import { setLanguage } from './i18n/index.js'
 import { saveStore } from './store/save.js'
 import { LEVELS, getLevel } from './data/levels.js'
@@ -17,6 +17,13 @@ export function startApp() {
 
   setLanguage(saveStore.settings.language)
   setSfxEnabled(saveStore.settings.sfx)
+
+  // 全局按钮点击音效（委托）
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('button')
+    if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true') return
+    playButton()
+  })
 
   const bgm = createZenBgm({ volume: saveStore.settings.volume })
   let bgmStarted = false

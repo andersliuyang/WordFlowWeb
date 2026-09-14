@@ -1,12 +1,13 @@
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { createGlyphTexture } from '../render/tile-texture.js'
-import { playClick } from '../audio/sfx.js'
+import { playClear, playSelect, playSlide, playImpact, playShatter } from '../audio/sfx.js'
 
 const TILE_SIZE = 1
 const SPACING = 1.16
 const TILE_GEO = new RoundedBoxGeometry(TILE_SIZE, TILE_SIZE, TILE_SIZE, 3, 0.16)
 const DECAL_GEO = new THREE.PlaneGeometry(0.66, 0.66)
+const SHARD_GEO = new THREE.BoxGeometry(0.17, 0.17, 0.17)
 
 function decalKey(tile) {
   return [tile.char, tile.type, tile.countdown ?? 0, tile.locked ? 1 : 0].join('|')
@@ -19,16 +20,26 @@ function tileColor(tile) {
   return 0xf0e4d6
 }
 
+const easeOutCubic = (p) => 1 - (1 - p) ** 3
+
+function vibrate(pattern) {
+  if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+    try {
+      navigator.vibrate(pattern)
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
 /**
- * 3D 棋盘视图 + 射线拾取输入。
- * 纯表现层：渲染 session.board，并把玩家选取的路径回调出去。
+ * 3D 棋盘视图 + 射线拾取输入 + 消除/级联动画时间线。
  */
 export function createGameScene(canvas, level, callbacks = {}) {
   const cols = level.grid_dim.x
   const rows = level.grid_dim.y
 
   const scene = new THREE.Scene()
-
   const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 400)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
@@ -48,6 +59,11 @@ export function createGameScene(canvas, level, callbacks = {}) {
 
   const views = new Map()
   const bursts = []
+  const shards = []
+  const anims = []
+  let busy = false
+  let shake = 0
+  let lastSlideAt = 0
   let selection = []
   let selecting = false
   let moved = false
@@ -63,6 +79,14 @@ export function createGameScene(canvas, level, callbacks = {}) {
     return new THREE.Vector3((x - (cols - 1) / 2) * SPACING, 0, (y - (rows - 1) / 2) * SPACING)
   }
 
+  function projectToScreen(world) {
+    const v = world.clone().project(camera)
+    return {
+      x: (v.x * 0.5 + 0.5) * (canvas.clientWidth || window.innerWidth),
+      y: (1 - (v.y * 0.5 + 0.5)) * (canvas.clientHeight || window.innerHeight),
+    }
+  }
+
   function fitCamera() {
     const width = canvas.clientWidth || window.innerWidth
     const height = canvas.clientHeight || window.innerHeight
@@ -70,18 +94,13 @@ export function createGameScene(canvas, level, callbacks = {}) {
     const tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)
     const tilt = THREE.MathUtils.degToRad(67)
     const sinTilt = Math.sin(tilt)
-
-    // 棋盘投影后的实际尺寸（纵深随 tilt 压缩）
     const boardW = (cols - 1) * SPACING + TILE_SIZE
     const boardH = ((rows - 1) * SPACING + TILE_SIZE) * sinTilt
-
-    // 为顶部（词表）与底部（按钮）HUD 预留安全区，并留出舒适的四周内边距
     const topInset = Math.min(150, height * 0.2)
     const bottomInset = Math.min(130, height * 0.16)
     const sideInset = Math.max(20, width * 0.07)
     const safeH = Math.max(140, height - topInset - bottomInset)
     const safeW = Math.max(140, width - sideInset * 2)
-
     const distW = (boardW * width) / (2 * tanHalf * camera.aspect * safeW)
     const distH = (boardH * height) / (2 * tanHalf * safeH)
     const dist = Math.max(distW, distH)
@@ -125,9 +144,17 @@ export function createGameScene(canvas, level, callbacks = {}) {
       colorKey: tileColor(tile),
       targetScale: 1,
       removing: false,
+      manual: false,
+      tile,
     }
     views.set(tile.id, view)
     return view
+  }
+
+  function disposeView(view) {
+    group.remove(view.mesh)
+    view.material.dispose()
+    view.decalMaterial.dispose()
   }
 
   function sync(board) {
@@ -138,9 +165,11 @@ export function createGameScene(canvas, level, callbacks = {}) {
       let view = views.get(id)
       if (!view) view = buildView(tile)
       view.tile = tile
+      view.manual = false
       view.targetPos = worldPos(tile.x, tile.y)
       view.removing = false
       view.targetScale = 1
+      view.mesh.visible = true
 
       const dk = decalKey(tile)
       if (view.decalKey !== dk) {
@@ -156,7 +185,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     }
 
     for (const [id, view] of views) {
-      if (!current.has(id) && !view.removing) {
+      if (!current.has(id) && !view.removing && !view.manual) {
         view.removing = true
         view.targetScale = 0
       }
@@ -166,15 +195,17 @@ export function createGameScene(canvas, level, callbacks = {}) {
   }
 
   function applySelectionHighlight() {
-    const selectedIds = new Set(selection.map(([x, y]) => {
-      const tile = findTileAt(x, y)
-      return tile ? tile.id : null
-    }))
+    const selectedIds = new Set(
+      selection.map(([x, y]) => {
+        const tile = findTileAt(x, y)
+        return tile ? tile.id : null
+      }),
+    )
     for (const [id, view] of views) {
       const on = selectedIds.has(id)
       view.material.emissive.set(on ? 0xffb85c : 0x000000)
       view.material.emissiveIntensity = on ? 0.5 : 0
-      if (!view.removing) view.targetScale = on ? 1.12 : 1
+      if (!view.removing && !view.manual) view.targetScale = on ? 1.12 : 1
     }
   }
 
@@ -217,7 +248,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     raycaster.setFromCamera(pointerNDC, camera)
     const targets = []
     for (const view of views.values()) {
-      if (!view.removing && view.targetScale > 0.5) targets.push(view.mesh)
+      if (!view.removing && !view.manual && view.targetScale > 0.5) targets.push(view.mesh)
     }
     const hits = raycaster.intersectObjects(targets, false)
     if (!hits.length) return null
@@ -228,20 +259,29 @@ export function createGameScene(canvas, level, callbacks = {}) {
 
   function addToSelection(tile) {
     const cell = [tile.x, tile.y]
-    if (selection.length === 0) {
+    const isFirst = selection.length === 0
+    if (isFirst) {
       selection = [cell]
     } else if (isAdjacent(selection[selection.length - 1], cell)) {
       if (!selection.some(([x, y]) => x === cell[0] && y === cell[1])) selection = selection.concat([cell])
     } else {
       selection = [cell]
     }
-    playClick()
+    if (isFirst || selection.length === 1) {
+      playSelect()
+    } else {
+      const now = performance.now()
+      if (now - lastSlideAt > 45) {
+        playSlide()
+        lastSlideAt = now
+      }
+    }
     applySelectionHighlight()
     emitSelectionChange()
   }
 
   function onPointerDown(event) {
-    if (disposed) return
+    if (disposed || busy) return
     const tile = pick(event)
     if (!tile) return
     selecting = true
@@ -261,7 +301,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
   }
 
   function onPointerMove(event) {
-    if (!selecting || disposed) return
+    if (!selecting || disposed || busy) return
     if (Math.hypot(event.clientX - downPoint.x, event.clientY - downPoint.y) > 6) moved = true
     const tile = pick(event)
     if (!tile) return
@@ -279,12 +319,8 @@ export function createGameScene(canvas, level, callbacks = {}) {
     canvas.releasePointerCapture?.(event.pointerId)
     const text = selectionText()
     if (moved) {
-      if (selection.length >= 2 && text) {
-        callbacks.onSubmit?.(selection.slice())
-        clearSelection()
-      } else {
-        clearSelection()
-      }
+      if (selection.length >= 2 && text) callbacks.onSubmit?.(selection.slice())
+      clearSelection()
     }
   }
 
@@ -293,13 +329,9 @@ export function createGameScene(canvas, level, callbacks = {}) {
   canvas.addEventListener('pointerup', onPointerUp)
   canvas.addEventListener('pointercancel', onPointerUp)
 
-  function burst(cells) {
-    if (!cells.length) return
-    const center = new THREE.Vector3()
-    for (const [x, y] of cells) center.add(worldPos(x, y))
-    center.multiplyScalar(1 / cells.length)
-
-    const count = 18
+  // ---------- particles ----------
+  function burstAtWorld(center) {
+    const count = 20
     const positions = new Float32Array(count * 3)
     const velocities = []
     for (let i = 0; i < count; i += 1) {
@@ -307,15 +339,203 @@ export function createGameScene(canvas, level, callbacks = {}) {
       positions[i * 3 + 1] = center.y
       positions[i * 3 + 2] = center.z
       const angle = (i / count) * Math.PI * 2
-      const speed = 0.04 + Math.random() * 0.06
-      velocities.push(new THREE.Vector3(Math.cos(angle) * speed, 0.05 + Math.random() * 0.06, Math.sin(angle) * speed))
+      const speed = 0.05 + Math.random() * 0.07
+      velocities.push(new THREE.Vector3(Math.cos(angle) * speed, 0.06 + Math.random() * 0.07, Math.sin(angle) * speed))
     }
     const geometry = new THREE.BufferGeometry()
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    const material = new THREE.PointsMaterial({ color: 0xe8b06a, size: 0.16, transparent: true, opacity: 0.95, depthWrite: false })
+    const material = new THREE.PointsMaterial({ color: 0xe8b06a, size: 0.18, transparent: true, opacity: 1, depthWrite: false })
     const points = new THREE.Points(geometry, material)
     scene.add(points)
-    bursts.push({ points, geometry, material, velocities, life: 0, ttl: 0.7 })
+    bursts.push({ points, geometry, material, velocities, life: 0, ttl: 0.75 })
+  }
+
+  function burst(cells) {
+    if (!cells || !cells.length) return
+    const center = new THREE.Vector3()
+    for (const [x, y] of cells) center.add(worldPos(x, y))
+    center.multiplyScalar(1 / cells.length)
+    burstAtWorld(center)
+  }
+
+  function showWordPop(world, text) {
+    const parent = canvas.parentElement
+    if (!parent || !text) return
+    const p = projectToScreen(world)
+    const el = document.createElement('div')
+    el.className = 'word-pop'
+    el.textContent = text
+    el.style.left = `${p.x}px`
+    el.style.top = `${p.y}px`
+    parent.appendChild(el)
+    window.setTimeout(() => el.remove(), 950)
+  }
+
+  function setOpacity(view, value) {
+    view.material.transparent = true
+    view.material.opacity = value
+    view.decalMaterial.opacity = value
+    view.material.needsUpdate = true
+  }
+
+  function spawnShards(hex, pos) {
+    const count = 9
+    for (let i = 0; i < count; i += 1) {
+      const mat = new THREE.MeshBasicMaterial({ color: hex, transparent: true, opacity: 1 })
+      const mesh = new THREE.Mesh(SHARD_GEO, mat)
+      mesh.position.copy(pos)
+      const dir = new THREE.Vector3(Math.random() - 0.5, Math.random() * 0.7 + 0.15, Math.random() - 0.5).normalize()
+      shards.push({
+        mesh,
+        mat,
+        vel: dir.multiplyScalar(2.4 + Math.random() * 2.4),
+        ang: new THREE.Vector3((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12, (Math.random() - 0.5) * 12),
+        life: 0,
+        ttl: 0.5 + Math.random() * 0.25,
+      })
+      group.add(mesh)
+    }
+  }
+
+  function pulseTiles(path, done) {
+    const targets = path.map(([x, y]) => findTileAt(x, y)).filter(Boolean).map((t) => views.get(t.id)).filter(Boolean)
+    targets.forEach((v) => {
+      v.manual = true
+    })
+    let t = 0
+    anims.push({
+      update(dt) {
+        t += dt
+        const p = Math.min(1, t / 0.26)
+        const s = 1 + Math.sin(p * Math.PI) * 0.18
+        targets.forEach((v) => v.mesh.scale.setScalar(s))
+        if (p >= 1) {
+          targets.forEach((v) => {
+            v.mesh.scale.setScalar(1)
+            v.manual = false
+          })
+          done()
+          return true
+        }
+        return false
+      },
+    })
+  }
+
+  // ---------- resolution timeline ----------
+  function playResolution(events, finalBoard, opts = {}) {
+    if (disposed) return
+    busy = true
+    if (selection.length) clearSelection()
+
+    const originPositions = new Map()
+    for (const [id, view] of views) originPositions.set(id, view.mesh.position.clone())
+
+    const cascadeIds = new Set()
+    for (const ev of events) {
+      if (ev.kind === 'clear' && ev.cascade) for (const tile of ev.removed) cascadeIds.add(tile.id)
+    }
+
+    let index = 0
+    function nextStep() {
+      if (index >= events.length) {
+        busy = false
+        sync(finalBoard)
+        opts.onDone?.()
+        return
+      }
+      const ev = events[index]
+      index += 1
+      opts.onEvent?.(ev)
+
+      if (ev.kind === 'crack') {
+        playSelect()
+        pulseTiles(ev.path, nextStep)
+      } else if (ev.kind === 'clear') {
+        animateClear(ev, cascadeIds, originPositions, nextStep)
+      } else {
+        nextStep()
+      }
+    }
+    nextStep()
+  }
+
+  function animateClear(ev, cascadeIds, originPositions, done) {
+    const removedViews = ev.removed.map((t) => views.get(t.id)).filter(Boolean)
+    const movedViews = ev.moves
+      .filter((m) => !cascadeIds.has(m.tile.id))
+      .map((m) => ({ view: views.get(m.tile.id), to: worldPos(m.tile.x, m.toY) }))
+      .filter((m) => m.view)
+
+    removedViews.forEach((v) => {
+      v.manual = true
+    })
+    movedViews.forEach((m) => {
+      m.view.manual = true
+      m.from = m.view.mesh.position.clone()
+    })
+
+    // 级联：从本次操作开始的位置（上下两端）飞入；普通消除：从当前位置微撞
+    const starts = removedViews.map((v) => {
+      const origin = ev.cascade ? originPositions.get(v.tile.id) : v.mesh.position
+      return (origin || v.mesh.position).clone()
+    })
+    removedViews.forEach((v, k) => v.mesh.position.copy(starts[k]))
+
+    const centroid = new THREE.Vector3()
+    starts.forEach((s) => centroid.add(s))
+    centroid.multiplyScalar(1 / Math.max(1, starts.length))
+
+    let phase = 0
+    let t = 0
+    let mStarts = null
+    const T_CONVERGE = 0.16
+    const T_GRAVITY = 0.18
+
+    anims.push({
+      update(dt) {
+        t += dt
+        if (phase === 0) {
+          const p = Math.min(1, t / T_CONVERGE)
+          const e = easeOutCubic(p)
+          removedViews.forEach((v, k) => {
+            v.mesh.position.lerpVectors(starts[k], centroid, e)
+            v.mesh.rotation.y += dt * 10
+            v.mesh.scale.setScalar(1 + e * 0.12)
+          })
+          if (p >= 1) {
+            // 硬碰撞：破碎成小块 + 粒子 + 词名 + 震动 + 音效
+            removedViews.forEach((v) => spawnShards(v.material.color.getHex(), v.mesh.position))
+            removedViews.forEach((v) => {
+              disposeView(v)
+              views.delete(v.tile.id)
+            })
+            burstAtWorld(centroid)
+            showWordPop(centroid, ev.text)
+            shake = 0.24
+            playImpact()
+            playShatter(0.06)
+            vibrate(30)
+            if (ev.cascade) window.setTimeout(() => playClear(ev.combo), 130)
+            mStarts = movedViews.map((m) => m.view.mesh.position.clone())
+            phase = 1
+            t = 0
+          }
+        } else {
+          const p = Math.min(1, t / T_GRAVITY)
+          const e = easeOutCubic(p)
+          movedViews.forEach((m, k) => m.view.mesh.position.lerpVectors(mStarts[k], m.to, e))
+          if (p >= 1) {
+            movedViews.forEach((m) => {
+              m.view.manual = false
+            })
+            done()
+            return true
+          }
+        }
+        return false
+      },
+    })
   }
 
   const clock = new THREE.Clock()
@@ -324,16 +544,22 @@ export function createGameScene(canvas, level, callbacks = {}) {
     const dt = Math.min(clock.getDelta(), 0.05)
 
     for (const [id, view] of [...views]) {
+      if (view.manual) continue
       const mesh = view.mesh
       if (view.targetPos) mesh.position.lerp(view.targetPos, Math.min(1, dt * 9))
-      const s = mesh.scale.x + (view.targetScale - mesh.scale.x) * Math.min(1, dt * 10)
+      const s = view.mesh.scale.x + (view.targetScale - view.mesh.scale.x) * Math.min(1, dt * 10)
       mesh.scale.setScalar(Math.max(s, 0.001))
-      if (view.removing && mesh.scale.x < 0.03) {
-        group.remove(mesh)
-        view.material.dispose()
-        view.decalMaterial.dispose()
-        views.delete(id)
+      if (view.removing) {
+        setOpacity(view, Math.max(0, view.material.opacity - dt * 4))
+        if (mesh.scale.x < 0.03) {
+          disposeView(view)
+          views.delete(id)
+        }
       }
+    }
+
+    for (let i = anims.length - 1; i >= 0; i -= 1) {
+      if (anims[i].update(dt)) anims.splice(i, 1)
     }
 
     for (let i = bursts.length - 1; i >= 0; i -= 1) {
@@ -344,16 +570,40 @@ export function createGameScene(canvas, level, callbacks = {}) {
         arr[j * 3] += b.velocities[j].x
         arr[j * 3 + 1] += b.velocities[j].y
         arr[j * 3 + 2] += b.velocities[j].z
-        b.velocities[j].y -= dt * 0.35
+        b.velocities[j].y -= dt * 0.5
       }
       b.geometry.attributes.position.needsUpdate = true
-      b.material.opacity = Math.max(0, 0.95 * (1 - b.life / b.ttl))
+      b.material.opacity = Math.max(0, 1 - b.life / b.ttl)
       if (b.life >= b.ttl) {
         scene.remove(b.points)
         b.geometry.dispose()
         b.material.dispose()
         bursts.splice(i, 1)
       }
+    }
+
+    for (let i = shards.length - 1; i >= 0; i -= 1) {
+      const s = shards[i]
+      s.life += dt
+      s.mesh.position.addScaledVector(s.vel, dt)
+      s.vel.y -= 8 * dt
+      s.mesh.rotation.x += s.ang.x * dt
+      s.mesh.rotation.y += s.ang.y * dt
+      s.mesh.rotation.z += s.ang.z * dt
+      s.mat.opacity = Math.max(0, 1 - s.life / s.ttl)
+      if (s.life >= s.ttl) {
+        group.remove(s.mesh)
+        s.mat.dispose()
+        shards.splice(i, 1)
+      }
+    }
+
+    if (shake > 0) {
+      shake = Math.max(0, shake - dt)
+      const mag = shake * 0.5
+      group.position.set((Math.random() - 0.5) * mag, 0, (Math.random() - 0.5) * mag)
+    } else if (group.position.lengthSq() !== 0) {
+      group.position.set(0, 0, 0)
     }
 
     renderer.render(scene, camera)
@@ -367,17 +617,15 @@ export function createGameScene(canvas, level, callbacks = {}) {
 
   return {
     sync,
+    playResolution,
     clearSelection,
     submitSelection() {
-      if (selection.length >= 2 && selectionText()) {
-        callbacks.onSubmit?.(selection.slice())
-      }
+      if (busy) return
+      if (selection.length >= 2 && selectionText()) callbacks.onSubmit?.(selection.slice())
       clearSelection()
     },
-    beginTargeted() {
-      callbacks.onSelectionMode?.('targeted')
-    },
     previewPath(cells) {
+      if (busy) return
       selection = cells.slice()
       applySelectionHighlight()
       emitSelectionChange()
@@ -390,6 +638,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     },
     dispose() {
       disposed = true
+      busy = true
       cancelAnimationFrame(rafId)
       window.clearTimeout(previewTimer)
       observer.disconnect()
@@ -397,11 +646,13 @@ export function createGameScene(canvas, level, callbacks = {}) {
       canvas.removeEventListener('pointermove', onPointerMove)
       canvas.removeEventListener('pointerup', onPointerUp)
       canvas.removeEventListener('pointercancel', onPointerUp)
-      for (const view of views.values()) {
-        view.material.dispose()
-        view.decalMaterial.dispose()
-      }
+      for (const view of views.values()) disposeView(view)
       views.clear()
+      for (const s of shards) {
+        group.remove(s.mesh)
+        s.mat.dispose()
+      }
+      shards.length = 0
       renderer.dispose()
     },
   }

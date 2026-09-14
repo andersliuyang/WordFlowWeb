@@ -813,6 +813,41 @@ body {
   font-size: 16px;
 }
 
+/* ---------- Cascade word pop ---------- */
+
+.word-pop {
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+  font-weight: 800;
+  font-size: clamp(22px, 6vw, 32px);
+  letter-spacing: 0.06em;
+  color: #c08b78;
+  text-shadow: 0 2px 10px rgba(255, 255, 255, 0.95), 0 0 22px rgba(208, 164, 143, 0.8);
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+  animation: wordPop 0.95s ease-out forwards;
+}
+
+@keyframes wordPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.4);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.25);
+  }
+  60% {
+    opacity: 1;
+    transform: translate(-50%, -95%) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -155%) scale(1);
+  }
+}
+
 /* ---------- In-game coach tips ---------- */
 
 .coach {
