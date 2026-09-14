@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js'
 import { createTextTexture } from '../render/text-texture.js'
 
 const GLYPHS = ['字', '谜', 'W', 'O', '词', 'R', 'D', '风']
@@ -103,15 +104,14 @@ export function createHomeScene(canvas) {
     disposables.push(geometry, material)
   }
 
-  const cubeGeometry = new THREE.BoxGeometry(1.6, 1.6, 1.6)
+  const cubeGeometry = new RoundedBoxGeometry(1.6, 1.6, 1.6, 4, 0.26)
   disposables.push(cubeGeometry)
   const cubeCount = 6
   for (let i = 0; i < cubeCount; i += 1) {
     const glyph = GLYPHS[i]
     const material = new THREE.MeshStandardMaterial({
       map: createTextTexture(glyph),
-      flatShading: true,
-      roughness: 0.82,
+      roughness: 0.72,
       metalness: 0,
     })
     const mesh = new THREE.Mesh(cubeGeometry, material)
