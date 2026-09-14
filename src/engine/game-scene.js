@@ -67,15 +67,25 @@ export function createGameScene(canvas, level, callbacks = {}) {
     const width = canvas.clientWidth || window.innerWidth
     const height = canvas.clientHeight || window.innerHeight
     camera.aspect = width / height
-    const fovRad = THREE.MathUtils.degToRad(camera.fov)
-    const halfW = (cols * SPACING) / 2 + 1
-    const halfD = (rows * SPACING) / 2 + 1
-    const distW = halfW / (Math.tan(fovRad / 2) * camera.aspect)
-    const distH = halfD / Math.tan(fovRad / 2)
-    const dist = Math.max(distW, distH) * 1.28
-    // 接近俯视：仰角约 67°
+    const tanHalf = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2)
     const tilt = THREE.MathUtils.degToRad(67)
-    camera.position.set(0, Math.sin(tilt) * dist, Math.cos(tilt) * dist)
+    const sinTilt = Math.sin(tilt)
+
+    // 棋盘投影后的实际尺寸（纵深随 tilt 压缩）
+    const boardW = (cols - 1) * SPACING + TILE_SIZE
+    const boardH = ((rows - 1) * SPACING + TILE_SIZE) * sinTilt
+
+    // 为顶部（词表）与底部（按钮）HUD 预留安全区，并留出舒适的四周内边距
+    const topInset = Math.min(150, height * 0.2)
+    const bottomInset = Math.min(130, height * 0.16)
+    const sideInset = Math.max(20, width * 0.07)
+    const safeH = Math.max(140, height - topInset - bottomInset)
+    const safeW = Math.max(140, width - sideInset * 2)
+
+    const distW = (boardW * width) / (2 * tanHalf * camera.aspect * safeW)
+    const distH = (boardH * height) / (2 * tanHalf * safeH)
+    const dist = Math.max(distW, distH)
+    camera.position.set(0, sinTilt * dist, Math.cos(tilt) * dist)
     camera.lookAt(0, 0, 0)
     camera.updateProjectionMatrix()
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
