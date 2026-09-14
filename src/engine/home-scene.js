@@ -1,7 +1,27 @@
 import * as THREE from 'three'
 import { createTextTexture } from '../render/text-texture.js'
 
-const GLYPHS = ['W', 'O', 'R', 'D', 'F', 'L', 'O', 'W', '字', '谜', '消', '词', '拼', '合', '风', '云']
+const GLYPHS = ['字', '谜', 'W', 'O', '词', 'R', 'D', '风']
+
+// 莫兰迪 / 马卡龙 低多边形配色
+const SHAPE_COLORS = [
+  0xd7b8b2, // 莫兰迪 玫瑰
+  0xb9c7b3, // 莫兰迪 鼠尾草绿
+  0xaec1d4, // 莫兰迪 雾霾蓝
+  0xc9b6d4, // 莫兰迪 薰衣草
+  0xe0ccac, // 莫兰迪 沙
+  0xd0a48f, // 莫兰迪 陶土
+  0xe6c9c0, // 马卡龙 粉
+  0xc3d6cd, // 马卡龙 薄荷
+]
+
+const SHAPES = [
+  () => new THREE.IcosahedronGeometry(1.1, 0),
+  () => new THREE.DodecahedronGeometry(1.05, 0),
+  () => new THREE.OctahedronGeometry(1.15, 0),
+  () => new THREE.TetrahedronGeometry(1.25, 0),
+  () => new THREE.IcosahedronGeometry(0.95, 1),
+]
 
 function mulberry32(seed) {
   let a = seed
@@ -14,102 +34,135 @@ function mulberry32(seed) {
   }
 }
 
+function makeFloater(mesh, random) {
+  mesh.userData = {
+    rx: (random() - 0.5) * 0.45,
+    ry: (random() - 0.5) * 0.45,
+    baseY: mesh.position.y,
+    bob: 0.2 + random() * 0.45,
+    phase: random() * Math.PI * 2,
+  }
+}
+
 /**
- * 首页 3D 背景：悬浮字符方块 + 星场 + 指针视差。
- * 所有视觉均由代码生成，不加载任何外部资源。
+ * 首页 3D 背景：低多边形几何体 + 字符方块 + 柔和粒子 + 指针视差。
+ * 低多边形莫兰迪 / 马卡龙风格，全部由代码生成，不加载任何外部资源。
  */
 export function createHomeScene(canvas) {
   const scene = new THREE.Scene()
-  scene.fog = new THREE.FogExp2(0x070b17, 0.038)
+  scene.fog = new THREE.Fog(0xf1ebe2, 16, 46)
 
-  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100)
-  camera.position.set(0, 0, 14)
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100)
+  camera.position.set(0, 0, 15)
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true })
   renderer.setClearColor(0x000000, 0)
+  renderer.outputColorSpace = THREE.SRGBColorSpace
 
-  scene.add(new THREE.AmbientLight(0x9fc7ff, 0.85))
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xe0d5c8, 1.15))
 
-  const key = new THREE.DirectionalLight(0xffffff, 1.7)
-  key.position.set(6, 9, 11)
+  const key = new THREE.DirectionalLight(0xfff6ee, 1.15)
+  key.position.set(6, 9, 10)
   scene.add(key)
 
-  const rim = new THREE.PointLight(0x4f7cff, 90, 60)
-  rim.position.set(-9, -4, 7)
-  scene.add(rim)
-
-  const warm = new THREE.PointLight(0xff7ecb, 70, 60)
-  warm.position.set(10, -7, 5)
-  scene.add(warm)
+  const fill = new THREE.DirectionalLight(0xcad8e6, 0.55)
+  fill.position.set(-8, -4, 6)
+  scene.add(fill)
 
   const group = new THREE.Group()
   scene.add(group)
 
-  const random = mulberry32(20260914)
-  const geometry = new THREE.BoxGeometry(1.7, 1.7, 1.7)
-  const cubes = []
-  const count = GLYPHS.length
+  const random = mulberry32(20260915)
+  const floaters = []
+  const disposables = []
 
-  for (let i = 0; i < count; i += 1) {
-    const glyph = GLYPHS[i]
+  const shapeCount = 14
+  for (let i = 0; i < shapeCount; i += 1) {
+    const geometry = SHAPES[i % SHAPES.length]()
+    const color = SHAPE_COLORS[Math.floor(random() * SHAPE_COLORS.length)]
     const material = new THREE.MeshStandardMaterial({
-      map: createTextTexture(glyph),
-      roughness: 0.32,
-      metalness: 0.18,
+      color,
+      flatShading: true,
+      roughness: 0.85,
+      metalness: 0,
     })
     const mesh = new THREE.Mesh(geometry, material)
 
-    const angle = (i / count) * Math.PI * 2 + random() * 0.7
-    const radius = 8.5 * (0.45 + random() * 0.55)
+    const angle = (i / shapeCount) * Math.PI * 2 + random() * 0.6
+    const radius = 9 * (0.5 + random() * 0.55)
     mesh.position.set(
       Math.cos(angle) * radius,
-      (random() - 0.5) * 9,
-      -1.5 - random() * 9,
+      (random() - 0.5) * 10,
+      -2 - random() * 9,
     )
     mesh.rotation.set(random() * Math.PI, random() * Math.PI, random() * Math.PI)
-    mesh.userData = {
-      rx: (random() - 0.5) * 0.5,
-      ry: (random() - 0.5) * 0.5,
-      baseY: mesh.position.y,
-      bob: 0.25 + random() * 0.5,
-      phase: random() * Math.PI * 2,
-    }
+    makeFloater(mesh, random)
+
     group.add(mesh)
-    cubes.push(mesh)
+    floaters.push(mesh)
+    disposables.push(geometry, material)
   }
 
-  const starCount = 420
-  const starPositions = new Float32Array(starCount * 3)
-  for (let i = 0; i < starCount; i += 1) {
-    starPositions[i * 3] = (random() - 0.5) * 46
-    starPositions[i * 3 + 1] = (random() - 0.5) * 30
-    starPositions[i * 3 + 2] = -6 - random() * 34
+  const cubeGeometry = new THREE.BoxGeometry(1.6, 1.6, 1.6)
+  disposables.push(cubeGeometry)
+  const cubeCount = 6
+  for (let i = 0; i < cubeCount; i += 1) {
+    const glyph = GLYPHS[i]
+    const material = new THREE.MeshStandardMaterial({
+      map: createTextTexture(glyph),
+      flatShading: true,
+      roughness: 0.82,
+      metalness: 0,
+    })
+    const mesh = new THREE.Mesh(cubeGeometry, material)
+
+    const angle = (i / cubeCount) * Math.PI * 2 + 0.35 + random() * 0.4
+    const radius = 8.5 * (0.55 + random() * 0.4)
+    mesh.position.set(
+      Math.cos(angle) * radius,
+      (random() - 0.5) * 8,
+      -1 - random() * 6,
+    )
+    mesh.rotation.set((random() - 0.5) * 0.5, random() * Math.PI, (random() - 0.5) * 0.3)
+    makeFloater(mesh, random)
+
+    group.add(mesh)
+    floaters.push(mesh)
+    disposables.push(material)
   }
-  const starGeometry = new THREE.BufferGeometry()
-  starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3))
-  const starMaterial = new THREE.PointsMaterial({
-    color: 0x9fd0ff,
-    size: 0.09,
+
+  const particleCount = 240
+  const particlePositions = new Float32Array(particleCount * 3)
+  for (let i = 0; i < particleCount; i += 1) {
+    particlePositions[i * 3] = (random() - 0.5) * 44
+    particlePositions[i * 3 + 1] = (random() - 0.5) * 28
+    particlePositions[i * 3 + 2] = -5 - random() * 32
+  }
+  const particleGeometry = new THREE.BufferGeometry()
+  particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
+  const particleMaterial = new THREE.PointsMaterial({
+    color: 0xfdf6ec,
+    size: 0.11,
     transparent: true,
-    opacity: 0.75,
+    opacity: 0.6,
     depthWrite: false,
   })
-  const stars = new THREE.Points(starGeometry, starMaterial)
-  scene.add(stars)
+  const particles = new THREE.Points(particleGeometry, particleMaterial)
+  scene.add(particles)
+  disposables.push(particleGeometry, particleMaterial)
 
   const pointer = { x: 0, y: 0 }
   const target = { x: 0, y: 0 }
 
   const host = canvas.parentElement || document.body
-  const size = { width: 1, height: 1 }
 
   function resize() {
-    size.width = host.clientWidth || window.innerWidth
-    size.height = host.clientHeight || window.innerHeight
-    camera.aspect = size.width / size.height
+    const width = host.clientWidth || window.innerWidth
+    const height = host.clientHeight || window.innerHeight
+    camera.aspect = width / height
     camera.updateProjectionMatrix()
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
-    renderer.setSize(size.width, size.height, false)
+    renderer.setSize(width, height, false)
   }
   resize()
 
@@ -133,13 +186,14 @@ export function createHomeScene(canvas) {
     group.rotation.y = pointer.x * 0.22
     group.rotation.x = pointer.y * 0.12
 
-    for (const cube of cubes) {
-      cube.rotation.x += cube.userData.rx * 0.006
-      cube.rotation.y += cube.userData.ry * 0.006
-      cube.position.y = cube.userData.baseY + Math.sin(t * cube.userData.bob + cube.userData.phase) * 0.35
+    for (const mesh of floaters) {
+      mesh.rotation.x += mesh.userData.rx * 0.006
+      mesh.rotation.y += mesh.userData.ry * 0.006
+      mesh.position.y =
+        mesh.userData.baseY + Math.sin(t * mesh.userData.bob + mesh.userData.phase) * 0.35
     }
 
-    stars.rotation.z = t * 0.008
+    particles.rotation.z = t * 0.006
 
     camera.position.x = pointer.x * 1.1
     camera.position.y = -pointer.y * 0.7
@@ -155,10 +209,7 @@ export function createHomeScene(canvas) {
       cancelAnimationFrame(rafId)
       observer.disconnect()
       window.removeEventListener('pointermove', onPointerMove)
-      geometry.dispose()
-      for (const cube of cubes) cube.material.dispose()
-      starGeometry.dispose()
-      starMaterial.dispose()
+      for (const item of disposables) item.dispose()
       renderer.dispose()
     },
   }
