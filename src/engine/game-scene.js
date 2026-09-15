@@ -102,7 +102,7 @@ export function createGameScene(canvas, level, callbacks = {}) {
     // 横屏 / 桌面：预留更大 HUD 空间，并把棋盘缩到约 80%
     const wide = width >= 900 && height >= 600
     const topInset = Math.min(wide ? 190 : 150, height * (wide ? 0.26 : 0.2))
-    const bottomInset = Math.min(wide ? 150 : 130, height * (wide ? 0.2 : 0.16))
+    const bottomInset = Math.min(wide ? 150 : 96, height * (wide ? 0.2 : 0.12))
     const sideInset = Math.max(20, width * (wide ? 0.1 : 0.07))
     const shrink = wide ? 1.08 : 1
     const safeH = Math.max(140, height - topInset - bottomInset)

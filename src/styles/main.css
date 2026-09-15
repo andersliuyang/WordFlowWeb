@@ -40,6 +40,14 @@ body {
   inset: 0;
 }
 
+@supports (height: 100dvh) {
+  #app,
+  .home,
+  .screen {
+    height: 100dvh;
+  }
+}
+
 .home__canvas {
   position: absolute;
   inset: 0;
@@ -413,7 +421,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px);
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px calc(env(safe-area-inset-bottom, 0px) + 4px);
   pointer-events: none;
 }
 
