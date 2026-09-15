@@ -19,13 +19,17 @@
   display: none !important;
 }
 
-html,
-body {
+html {
   height: 100%;
-  margin: 0;
+  height: -webkit-fill-available;
+  background: #f2eae0;
 }
 
 body {
+  height: 100%;
+  height: -webkit-fill-available;
+  min-height: 100vh;
+  margin: 0;
   background: radial-gradient(120% 120% at 50% 0%, #fbf7f1 0%, #f2eae0 46%, #e8ded1 100%);
   color: var(--ink);
   font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -40,12 +44,8 @@ body {
   inset: 0;
 }
 
-@supports (height: 100dvh) {
-  #app,
-  .home,
-  .screen {
-    height: 100dvh;
-  }
+.screen {
+  height: 100%;
 }
 
 .home__canvas {
@@ -75,7 +75,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: clamp(24px, 5vh, 64px) 24px;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px calc(env(safe-area-inset-bottom, 0px) + 10px);
   text-align: center;
   pointer-events: none;
 }
