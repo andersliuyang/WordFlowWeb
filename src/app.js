@@ -212,4 +212,14 @@ export function startApp() {
   }
 
   showHome()
+  hideBoot()
+}
+
+function hideBoot() {
+  const boot = document.getElementById('boot')
+  if (!boot) return
+  window.requestAnimationFrame(() => {
+    boot.classList.add('boot--hide')
+    window.setTimeout(() => boot.remove(), 400)
+  })
 }
