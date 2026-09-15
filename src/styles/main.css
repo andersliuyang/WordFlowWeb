@@ -563,9 +563,15 @@ body {
   .chip-btn {
     flex: 1 1 0;
     min-width: 0;
-    padding: 9px 4px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 8px 3px;
     font-size: 12px;
-    white-space: nowrap;
+    line-height: 1.2;
+  }
+
+  .chip-btn__main {
+    gap: 4px;
   }
 
   .submit-btn {
@@ -593,6 +599,20 @@ body {
   width: 16px;
   height: 16px;
   flex: none;
+}
+
+.chip-btn__main {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.chip-btn__cost {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
 }
 
 .chip-btn:hover {
@@ -786,6 +806,51 @@ body {
 
 .home__links .btn--ghost {
   margin-top: 0;
+}
+
+/* ---------- Add to Home Screen hint ---------- */
+
+.a2hs {
+  position: absolute;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 54px);
+  transform: translateX(-50%);
+  width: min(88vw, 380px);
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(253, 250, 245, 0.95);
+  border: 1px solid rgba(174, 193, 212, 0.6);
+  box-shadow: 0 12px 30px rgba(150, 140, 128, 0.28);
+  color: var(--ink);
+  text-align: center;
+  z-index: 5;
+}
+
+.a2hs__title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.a2hs__steps {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.a2hs__ok {
+  margin-top: 8px;
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 18px;
+  font: inherit;
+  font-size: 13px;
+  color: #34404d;
+  background: var(--sky);
+  cursor: pointer;
 }
 
 /* ---------- Guide ---------- */

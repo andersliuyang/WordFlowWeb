@@ -49,6 +49,10 @@ const STRINGS = {
     lockKeyHint: '锁住了：需先消除',
     lockAdjacent: '锁住了：需先消除相邻的词',
     confirm: '确定',
+    a2hsTitle: '添加到主屏幕，全屏游玩',
+    a2hsIos: 'iOS：点底部分享按钮（方框↑）→ 添加到主屏幕',
+    a2hsAndroid: '安卓 Chrome：点右上角「⋮」→ 添加到主屏幕 / 安装应用',
+    a2hsDismiss: '知道了',
   },
   'en-US': {
     start: 'Start Game',
@@ -100,6 +104,10 @@ const STRINGS = {
     lockKeyHint: 'Locked — clear',
     lockAdjacent: 'Locked — clear an adjacent word',
     confirm: 'Confirm',
+    a2hsTitle: 'Add to Home Screen for fullscreen play',
+    a2hsIos: 'iOS: tap Share (□↑) → Add to Home Screen',
+    a2hsAndroid: 'Android Chrome: tap ⋮ → Add to Home screen / Install app',
+    a2hsDismiss: 'Got it',
   },
 }
 

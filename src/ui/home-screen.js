@@ -1,9 +1,20 @@
 import { t, getLanguage } from '../i18n/index.js'
 
-export function mountHomeScreen({ onStart, onSettings, onGuide }) {
+export function mountHomeScreen({ onStart, onSettings, onGuide, a2hs, onDismissA2hs }) {
   const el = document.createElement('div')
   el.className = 'home'
   const showZh = getLanguage() === 'zh-CN'
+  const hint = a2hs
+    ? `
+      <div class="a2hs" data-role="a2hs">
+        <div class="a2hs__title">${t('a2hsTitle')}</div>
+        <div class="a2hs__steps">
+          ${a2hs.ios ? `<span>${t('a2hsIos')}</span>` : ''}
+          ${a2hs.android ? `<span>${t('a2hsAndroid')}</span>` : ''}
+        </div>
+        <button class="a2hs__ok" data-role="a2hs-ok" type="button">${t('a2hsDismiss')}</button>
+      </div>`
+    : ''
   el.innerHTML = `
     <canvas class="home__canvas" aria-hidden="true"></canvas>
     <div class="home__glow" aria-hidden="true"></div>
@@ -24,11 +35,16 @@ export function mountHomeScreen({ onStart, onSettings, onGuide }) {
       <footer class="home__footer">
         <span>v0.1.0 · Preview</span>
       </footer>
+      ${hint}
     </div>
   `
   el.querySelector('[data-role="start"]').addEventListener('click', () => onStart?.())
   el.querySelector('[data-role="settings"]').addEventListener('click', () => onSettings?.())
   el.querySelector('[data-role="guide"]').addEventListener('click', () => onGuide?.())
+  el.querySelector('[data-role="a2hs-ok"]')?.addEventListener('click', () => {
+    onDismissA2hs?.()
+    el.querySelector('[data-role="a2hs"]')?.remove()
+  })
   return {
     el,
     canvas: el.querySelector('.home__canvas'),

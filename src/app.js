@@ -10,20 +10,64 @@ import { setSfxEnabled, playButton } from './audio/sfx.js'
 import { setLanguage, getLanguage } from './i18n/index.js'
 import { saveStore } from './store/save.js'
 import { LEVELS, getLevel } from './data/levels.js'
+import { DIE_SVG, drawAppIcon } from './ui/app-icon.js'
 
-function faviconSvg(letter) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6ede2"/><stop offset="1" stop-color="#e4d3c4"/></linearGradient><linearGradient id="t" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbf5ee"/><stop offset="1" stop-color="#efe3d6"/></linearGradient></defs><polygon points="10,14 17,7 61,7 54,14" fill="url(#t)"/><polygon points="54,14 61,7 61,51 54,58" fill="#d8c6b8"/><rect x="10" y="14" width="44" height="44" rx="10" fill="url(#f)" stroke="#cbb6a8" stroke-width="2.5"/><text x="32" y="34" text-anchor="middle" dominant-baseline="central" font-family="PingFang SC,Microsoft YaHei,Arial,sans-serif" font-size="30" font-weight="700" fill="#5b5349">${letter}</text></svg>`
+function setupPwa() {
+  const setLink = (rel, href, type) => {
+    let link = document.querySelector(`link[rel="${rel}"]`)
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = rel
+      document.head.appendChild(link)
+    }
+    if (type) link.type = type
+    link.href = href
+  }
+  setLink('icon', `data:image/svg+xml,${encodeURIComponent(DIE_SVG)}`, 'image/svg+xml')
+
+  try {
+    setLink('apple-touch-icon', drawAppIcon(180))
+    const manifest = {
+      name: '字·谜',
+      short_name: '字·谜',
+      description: '字·谜 — 3D 消除填字游戏',
+      start_url: './',
+      scope: './',
+      display: 'standalone',
+      orientation: 'any',
+      background_color: '#f7f3ec',
+      theme_color: '#f7f3ec',
+      icons: [
+        { src: drawAppIcon(192), sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: drawAppIcon(512), sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+      ],
+    }
+    setLink('manifest', `data:application/manifest+json,${encodeURIComponent(JSON.stringify(manifest))}`)
+  } catch {
+    /* canvas unavailable: keep favicon only */
+  }
+}
+
+function isStandalone() {
+  return (
+    (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+    window.navigator.standalone === true
+  )
+}
+
+function addToHomeInfo() {
+  if (isStandalone() || saveStore.flags.a2hsDismissed) return null
+  const ua = navigator.userAgent || ''
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const android = /Android/i.test(ua)
+  if (!ios && !android) return null
+  return { ios, android }
 }
 
 function applyLanguageChrome() {
   const zh = getLanguage() === 'zh-CN'
   document.documentElement.lang = zh ? 'zh-CN' : 'en'
-  document.title = zh ? 'WordFlow 字·谜' : 'WordFlow'
-  const link = document.querySelector('link[rel="icon"]')
-  if (link) {
-    const svg = faviconSvg(zh ? '字' : 'W')
-    link.href = `data:image/svg+xml,${encodeURIComponent(svg)}`
-  }
+  document.title = '字·谜'
 }
 
 export function startApp() {
@@ -38,6 +82,7 @@ export function startApp() {
   }
   setLanguage(saveStore.settings.language)
   applyLanguageChrome()
+  setupPwa()
   setSfxEnabled(saveStore.settings.sfx)
 
   // 全局按钮点击音效（委托）
@@ -93,6 +138,8 @@ export function startApp() {
       onStart: () => showLevelSelect(),
       onSettings: () => openSettings(),
       onGuide: () => openGuide(),
+      a2hs: addToHomeInfo(),
+      onDismissA2hs: () => saveStore.setFlag('a2hsDismissed', true),
     })
     const scene = createHomeScene(screen.canvas)
     mount({ el: screen.el, dispose: () => scene.dispose() }, () => showHome())

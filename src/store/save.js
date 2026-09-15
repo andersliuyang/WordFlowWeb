@@ -6,7 +6,7 @@ const DEFAULT_SAVE = {
   progress: { completed: {} },
   wallet: { coins: 200, hints: { normal: 3, targeted: 1, wand: 0 } },
   stats: { totalWords: 0, totalCombos: 0 },
-  flags: { guideSeen: false, tips: {} },
+  flags: { guideSeen: false, tips: {}, a2hsDismissed: false },
 }
 
 export const HINT_COST = { normal: 20, targeted: 40, wand: 80 }

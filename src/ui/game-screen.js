@@ -25,6 +25,10 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="8.2" cy="9" rx="3.1" ry="4.3"/><circle cx="6.3" cy="4" r="1.1"/><circle cx="9.1" cy="3.3" r="1"/><ellipse cx="16" cy="15.4" rx="3.1" ry="4.3" opacity="0.5"/><circle cx="14.1" cy="10.4" r="1.1" opacity="0.5"/><circle cx="16.9" cy="9.7" r="1" opacity="0.5"/></svg>',
 }
 
+function chipMarkup(icon, label, costHtml) {
+  return `<span class="chip-btn__main">${icon}<span>${label}</span></span><span class="chip-btn__cost">${costHtml}</span>`
+}
+
 export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
   const session = new GameSession(level)
   const el = document.createElement('div')
@@ -47,10 +51,10 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
       <div class="hud__bonus" data-role="bonus"></div>
       <div class="hud__selection" data-role="selection"></div>
       <div class="hud__bottom">
-        <button class="chip-btn" data-role="hint-normal" type="button">${ICONS.hint}${t('hintNormal')} ${ICONS.coin}<b data-role="cost-normal">${HINT_COST.normal}</b></button>
-        <button class="chip-btn" data-role="hint-targeted" type="button">${ICONS.target}${t('hintTargeted')} ${ICONS.coin}<b>${HINT_COST.targeted}</b></button>
-        <button class="chip-btn" data-role="hint-wand" type="button">${ICONS.wand}${t('hintWand')} ${ICONS.coin}<b>${HINT_COST.wand}</b></button>
-        <button class="chip-btn" data-role="shuffle" type="button">${ICONS.shuffle}${t('shuffle')} ${ICONS.coin}<b>${SHUFFLE_COST}</b></button>
+        <button class="chip-btn" data-role="hint-normal" type="button">${chipMarkup(ICONS.hint, t('hintNormal'), `${ICONS.coin}<b data-role="cost-normal">${HINT_COST.normal}</b>`)}</button>
+        <button class="chip-btn" data-role="hint-targeted" type="button">${chipMarkup(ICONS.target, t('hintTargeted'), `${ICONS.coin}<b>${HINT_COST.targeted}</b>`)}</button>
+        <button class="chip-btn" data-role="hint-wand" type="button">${chipMarkup(ICONS.wand, t('hintWand'), `${ICONS.coin}<b>${HINT_COST.wand}</b>`)}</button>
+        <button class="chip-btn" data-role="shuffle" type="button">${chipMarkup(ICONS.shuffle, t('shuffle'), `${ICONS.coin}<b>${SHUFFLE_COST}</b>`)}</button>
         <button class="btn btn--primary submit-btn" data-role="submit" type="button" hidden>${t('confirm')}</button>
       </div>
     </div>
@@ -163,9 +167,11 @@ export function mountGameScreen({ level, onExit, onNext, onRetry, onGuide }) {
     movesEl.textContent = level.move_limit ? `${session.moves}/${level.move_limit}` : String(session.moves)
     coinsEl.textContent = String(saveStore.wallet.coins)
     const itemCount = saveStore.hintCount('normal')
-    normalBtn.innerHTML = `${ICONS.hint}${t('hintNormal')} ${
-      itemCount > 0 ? `×${itemCount}` : `${ICONS.coin}<b>${HINT_COST.normal}</b>`
-    }`
+    normalBtn.innerHTML = chipMarkup(
+      ICONS.hint,
+      t('hintNormal'),
+      itemCount > 0 ? `×${itemCount}` : `${ICONS.coin}<b>${HINT_COST.normal}</b>`,
+    )
 
     wordsEl.innerHTML = level.target_words
       .map((word) => {
